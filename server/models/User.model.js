@@ -172,8 +172,6 @@ const userSchema = new mongoose.Schema(
 );
 
 // --- INDEXES ---
-userSchema.index({ phone: 1 });
-userSchema.index({ email: 1 });
 userSchema.index({ 'address.coordinates': '2dsphere' }); // For geospatial queries
 userSchema.index({ role: 1, verificationStatus: 1 });
 

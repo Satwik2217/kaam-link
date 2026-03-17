@@ -18,6 +18,11 @@ const jobBookingSchema = new mongoose.Schema(
       ref: 'WorkerProfile',
       required: [true, 'Worker Profile ID is required'],
     },
+    startOTP: {
+      type: String,
+      default: null,
+      select: false,
+    },
 
     // --- Job Details ---
     jobTitle: {

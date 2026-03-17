@@ -120,6 +120,13 @@ export const updateBookingStatus = async (req, res, next) => {
     }
 
     booking.status = status;
+    
+    // Auto-generate start OTP when worker accepts
+    if (status === 'accepted') {
+      const otp = Math.floor(1000 + Math.random() * 9000).toString();
+      booking.startOTP = otp;
+    }
+
     // Auto-release payment on completion
     if (status === 'completed') {
       booking.paymentStatus = 'released_to_worker';
@@ -134,10 +141,58 @@ export const updateBookingStatus = async (req, res, next) => {
     }
 
     await booking.save();
+    
+    // We don't want to expose startOTP to the worker in this response payload typically,
+    // but the employer needs it. The frontend might re-fetch.
+    const responseBooking = booking.toObject();
+    if (req.user.role === 'worker') delete responseBooking.startOTP;
+
     res.status(200).json({
       success: true,
       message: `Booking status updated to '${status}'.`,
-      booking,
+      booking: responseBooking,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Start job using OTP (Worker only)
+// @route   POST /api/v1/bookings/:id/start-otp
+// @access  Private (Worker)
+export const startJobWithOTP = async (req, res, next) => {
+  try {
+    const { otp } = req.body;
+    if (!otp) return next(new ApiError(400, 'Please provide the OTP.'));
+
+    // Include the startOTP field which is normally hidden
+    const booking = await JobBooking.findById(req.params.id).select('+startOTP');
+    if (!booking) return next(new ApiError(404, 'Booking not found.'));
+
+    if (booking.workerId.toString() !== req.user._id.toString()) {
+      return next(new ApiError(403, 'Not authorized to start this booking.'));
+    }
+
+    if (booking.status !== 'accepted') {
+      return next(new ApiError(400, 'Job cannot be started in its current status.'));
+    }
+
+    if (!booking.startOTP || booking.startOTP !== otp.toString()) {
+      return next(new ApiError(400, 'Invalid OTP provided. Please check again.'));
+    }
+
+    // OTP matched - update status
+    booking.status = 'in_progress';
+    booking.actualStartTime = new Date();
+    await booking.save();
+
+    const responseBooking = booking.toObject();
+    delete responseBooking.startOTP;
+
+    res.status(200).json({
+      success: true,
+      message: 'OTP verified. Job started successfully.',
+      booking: responseBooking,
     });
   } catch (error) {
     next(error);

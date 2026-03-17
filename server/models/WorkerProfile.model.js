@@ -194,7 +194,6 @@ const workerProfileSchema = new mongoose.Schema(
 );
 
 // --- INDEXES ---
-workerProfileSchema.index({ userId: 1 });
 workerProfileSchema.index({ primarySkill: 1 });
 workerProfileSchema.index({ 'stats.averageRating': -1 });
 workerProfileSchema.index({ 'availability.isAvailable': 1 });

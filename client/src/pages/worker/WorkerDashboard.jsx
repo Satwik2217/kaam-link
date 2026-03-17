@@ -1,10 +1,12 @@
 import React from 'react';
 import { useAuth } from '@/hooks/useAuth';
+import { useLanguage } from '@/context/LanguageContext';
 import SOSButton from '@/components/common/SOSButton';
 import { Briefcase, Star, DollarSign, CheckCircle, ShieldCheck, AlertCircle } from 'lucide-react';
 
 const WorkerDashboard = () => {
   const { user } = useAuth();
+  const { t } = useLanguage();
   const kycStatus = user?.kycStatus || 'not_submitted';
   const needsKyc = kycStatus === 'not_submitted' || kycStatus === 'rejected';
 
@@ -31,10 +33,10 @@ const WorkerDashboard = () => {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
         <div>
           <h1 className="font-display text-2xl font-bold text-gray-900">
-            Namaste, {user?.fullName?.split(' ')[0]}! 👋
+            {t('dashboard.workerHello').replace('{name}', user?.fullName?.split(' ')[0] || '')}
           </h1>
           <p className="text-gray-500 text-sm mt-1">
-            Here's an overview of your work activity.
+            {t('dashboard.workerSub')}
           </p>
         </div>
         <SOSButton />
@@ -42,11 +44,11 @@ const WorkerDashboard = () => {
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
         {[
-          { label: 'Jobs Completed', value: '0', icon: CheckCircle, color: 'text-success' },
-          { label: 'Avg. Rating', value: '—', icon: Star, color: 'text-accent' },
-          { label: 'Total Earned', value: '₹0', icon: DollarSign, color: 'text-primary' },
+          { label: t('dashboard.completedJobs'), value: '0', icon: CheckCircle, color: 'text-success' },
+          { label: t('dashboard.avgRating'), value: '—', icon: Star, color: 'text-accent' },
+          { label: t('dashboard.totalEarned'), value: '₹0', icon: DollarSign, color: 'text-primary' },
           {
-            label: 'Verification',
+            label: t('dashboard.verification'),
             value: user?.verificationStatus || 'Unverified',
             icon: ShieldCheck,
             color: 'text-secondary',

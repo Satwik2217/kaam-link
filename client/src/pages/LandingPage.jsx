@@ -67,8 +67,8 @@ const LandingPage = () => {
       <section className="py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">What do you need help with?</h2>
-            <p className="text-gray-500">Browse professionals across top categories</p>
+            <h2 className="text-3xl font-bold text-gray-900 mb-4">{t('home.whatHelp')}</h2>
+            <p className="text-gray-500">{t('home.browseCats')}</p>
           </div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {categories.map((cat, idx) => (
@@ -117,27 +117,27 @@ const LandingPage = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid md:grid-cols-2 gap-16 items-center">
             <div>
-              <h2 className="text-3xl font-bold text-gray-900 mb-6">Why Choose KaamLink?</h2>
+              <h2 className="text-3xl font-bold text-gray-900 mb-6">{t('home.whyKaamlink')}</h2>
               <div className="space-y-6">
                 <div className="flex gap-4">
                   <div className="flex-shrink-0 mt-1"><ShieldCheck className="w-6 h-6 text-green-500" /></div>
                   <div>
-                    <h4 className="font-bold text-gray-900">Background Checked</h4>
-                    <p className="text-gray-600 text-sm mt-1">Every worker must pass a thorough KYC verification process linking their Aadhaar before accepting jobs.</p>
+                    <h4 className="font-bold text-gray-900">{t('home.bgChecked')}</h4>
+                    <p className="text-gray-600 text-sm mt-1">{t('home.bgDesc')}</p>
                   </div>
                 </div>
                 <div className="flex gap-4">
                   <div className="flex-shrink-0 mt-1"><Briefcase className="w-6 h-6 text-primary" /></div>
                   <div>
-                    <h4 className="font-bold text-gray-900">Direct Connections, Zero Commissions</h4>
-                    <p className="text-gray-600 text-sm mt-1">Pay 100% of the wage directly to the worker. We don't take a cut from their hard-earned money.</p>
+                    <h4 className="font-bold text-gray-900">{t('home.directMatch')}</h4>
+                    <p className="text-gray-600 text-sm mt-1">{t('home.directDesc')}</p>
                   </div>
                 </div>
                 <div className="flex gap-4">
                   <div className="flex-shrink-0 mt-1"><Clock className="w-6 h-6 text-orange-500" /></div>
                   <div>
-                    <h4 className="font-bold text-gray-900">In-App SOS & Safety Tracking</h4>
-                    <p className="text-gray-600 text-sm mt-1">Integrated women-first safety features, one-click SOS button, and location status during active jobs.</p>
+                    <h4 className="font-bold text-gray-900">{t('home.safetyTitle')}</h4>
+                    <p className="text-gray-600 text-sm mt-1">{t('home.safetyDesc')}</p>
                   </div>
                 </div>
               </div>
