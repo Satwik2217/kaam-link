@@ -342,7 +342,7 @@ const SearchWorkers = () => {
                     ))}
                   </div>
                 )}
-              </>
+              </div>
             )}
           </div>
         )}
