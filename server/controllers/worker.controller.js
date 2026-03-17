@@ -73,7 +73,9 @@ const recomputeAndPersistProfileCompleteness = async ({ userId }) => {
 // @access  Public
 export const getWorkers = async (req, res, next) => {
   try {
-    const { skill, city, minRating, maxWage, page = 1, limit = 12 } = req.query;
+    const { skill, city, minRating, maxWage, page = 1, limit = 12, lat, lng } = req.query;
+    const skip = (parseInt(page, 10) - 1) * parseInt(limit, 10);
+    const limitNum = parseInt(limit, 10);
 
     // Real-world readiness: only show workers who are fully onboarded and online.
     const matchQuery = {
@@ -85,24 +87,100 @@ export const getWorkers = async (req, res, next) => {
     if (minRating) matchQuery['stats.averageRating'] = { $gte: parseFloat(minRating) };
     if (maxWage) matchQuery['wageRate.amount'] = { $lte: parseFloat(maxWage) };
 
-    const skip = (parseInt(page, 10) - 1) * parseInt(limit, 10);
-    const workers = await WorkerProfile.find(matchQuery)
-      .populate('userId', 'fullName profilePicture address verificationStatus gender')
-      .sort({ 'stats.averageRating': -1, 'stats.totalJobsCompleted': -1 })
-      .skip(skip)
-      .limit(parseInt(limit, 10))
-      .lean();
+    if (lat && lng) {
+      // 1. Geospatial search starting from User
+      const geoNearStage = {
+        $geoNear: {
+          near: { type: "Point", coordinates: [parseFloat(lng), parseFloat(lat)] },
+          distanceField: "distance", // Distance in meters
+          spherical: true,
+        }
+      };
 
-    const total = await WorkerProfile.countDocuments(matchQuery);
+      const lookupStage = {
+        $lookup: {
+          from: "workerprofiles",
+          localField: "workerProfile",
+          foreignField: "_id",
+          as: "workerProfileDoc"
+        }
+      };
 
-    res.status(200).json({
-      success: true,
-      count: workers.length,
-      total,
-      totalPages: Math.ceil(total / parseInt(limit, 10)),
-      currentPage: parseInt(page, 10),
-      workers,
-    });
+      const unwindStage = { $unwind: "$workerProfileDoc" };
+
+      // Re-map matchQuery to use workerProfileDoc prefix
+      const geoMatchQuery = {};
+      for (const key in matchQuery) {
+        geoMatchQuery[`workerProfileDoc.${key}`] = matchQuery[key];
+      }
+      
+      const aggregatePipeline = [
+        geoNearStage,
+        lookupStage,
+        unwindStage,
+        { $match: geoMatchQuery }
+      ];
+
+      // Get Total Count
+      const totalPipeline = [...aggregatePipeline, { $count: "total" }];
+      const totalResult = await User.aggregate(totalPipeline);
+      const total = totalResult.length > 0 ? totalResult[0].total : 0;
+
+      // Apply pagination
+      aggregatePipeline.push({ $skip: skip });
+      aggregatePipeline.push({ $limit: limitNum });
+
+      // Fetch
+      const aggregateDocs = await User.aggregate(aggregatePipeline);
+      
+      const workers = aggregateDocs.map(doc => {
+        const profile = doc.workerProfileDoc;
+        
+        // Mimic populate('userId') shape
+        profile.userId = {
+          _id: doc._id,
+          fullName: doc.fullName,
+          profilePicture: doc.profilePicture,
+          address: doc.address,
+          verificationStatus: doc.verificationStatus,
+          gender: doc.gender,
+        };
+        
+        // Pass distance back to frontend
+        profile.distance = doc.distance; 
+        
+        return profile;
+      });
+
+      return res.status(200).json({
+        success: true,
+        count: workers.length,
+        total,
+        totalPages: Math.ceil(total / limitNum),
+        currentPage: parseInt(page, 10),
+        workers,
+      });
+
+    } else {
+      // Standard Search (No Location)
+      const workers = await WorkerProfile.find(matchQuery)
+        .populate('userId', 'fullName profilePicture address verificationStatus gender')
+        .sort({ 'stats.averageRating': -1, 'stats.totalJobsCompleted': -1 })
+        .skip(skip)
+        .limit(limitNum)
+        .lean();
+
+      const total = await WorkerProfile.countDocuments(matchQuery);
+
+      return res.status(200).json({
+        success: true,
+        count: workers.length,
+        total,
+        totalPages: Math.ceil(total / limitNum),
+        currentPage: parseInt(page, 10),
+        workers,
+      });
+    }
   } catch (error) {
     next(error);
   }
@@ -204,7 +282,7 @@ export const submitKyc = async (req, res, next) => {
           kycSubmittedAt: new Date(),
         },
       },
-      { new: true, runValidators: true }
+      { new: true }
     );
 
     if (!user) return next(new ApiError(404, 'User not found'));

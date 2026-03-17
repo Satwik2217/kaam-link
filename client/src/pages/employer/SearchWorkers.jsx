@@ -2,7 +2,8 @@ import React, { useEffect, useMemo, useState } from 'react';
 import axiosInstance from '@/api/axiosInstance';
 import WorkerCard from '@/components/worker/WorkerCard';
 import CommandPalette from '@/components/common/CommandPalette';
-import { Search, Filter, Users, Star, MapPin, Clock, TrendingUp } from 'lucide-react';
+import MapDiscovery from '@/components/common/MapDiscovery';
+import { Search, Filter, Users, Star, MapPin, Clock, TrendingUp, Map as MapIcon, List } from 'lucide-react';
 
 const SearchWorkers = () => {
   const [workers, setWorkers] = useState([]);
@@ -12,6 +13,10 @@ const SearchWorkers = () => {
   const [isCommandOpen, setIsCommandOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState('rating');
+  // Feature: Map functionality
+  const [viewMode, setViewMode] = useState('list'); // 'list' | 'map'
+  const [userLocation, setUserLocation] = useState(null);
+  const [isLocating, setIsLocating] = useState(false);
 
   const categories = useMemo(
     () => [
@@ -37,7 +42,13 @@ const SearchWorkers = () => {
     const fetchAllWorkers = async () => {
       setIsLoading(true);
       try {
-        const { data } = await axiosInstance.get('/workers');
+        const params = {};
+        if (userLocation) {
+          params.lat = userLocation.lat;
+          params.lng = userLocation.lng;
+        }
+
+        const { data } = await axiosInstance.get('/workers', { params });
         if (data.success) {
           setAllWorkers(data.workers || []);
           if (selectedSkill) {
@@ -54,7 +65,30 @@ const SearchWorkers = () => {
       }
     };
     fetchAllWorkers();
-  }, [selectedSkill]);
+  }, [selectedSkill, userLocation]);
+
+  const handleGetLocation = () => {
+    if (!navigator.geolocation) {
+      alert("Geolocation is not supported by your browser");
+      return;
+    }
+    setIsLocating(true);
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        setUserLocation({
+          lat: position.coords.latitude,
+          lng: position.coords.longitude
+        });
+        setIsLocating(false);
+        setViewMode('map');
+      },
+      (error) => {
+        console.error(error);
+        alert("Unable to retrieve your location. Please check your browser permissions.");
+        setIsLocating(false);
+      }
+    );
+  };
 
   const filteredAndSortedWorkers = useMemo(() => {
     let filtered = workers;
@@ -64,23 +98,31 @@ const SearchWorkers = () => {
       filtered = filtered.filter(w => 
         w.name?.toLowerCase().includes(query) ||
         w.skills?.some(skill => skill.toLowerCase().includes(query)) ||
-        w.location?.toLowerCase().includes(query)
+        w.location?.toLowerCase().includes(query) ||
+        w.userId?.fullName?.toLowerCase().includes(query)
       );
     }
     
+    // If we have userLocation, the backend already sorted by distance using $geoNear
+    // In that case, we might want to prioritize 'distance' over 'rating' unless user specifically picked 'rating'
     return filtered.sort((a, b) => {
       switch (sortBy) {
         case 'rating':
-          return (b.rating || 0) - (a.rating || 0);
+          return (b.stats?.averageRating || 0) - (a.stats?.averageRating || 0);
+        case 'distance':
+          if (userLocation && a.distance !== undefined && b.distance !== undefined) {
+             return a.distance - b.distance;
+          }
+          return 0; // Fallback
         case 'experience':
-          return (b.experience || 0) - (a.experience || 0);
+          return (b.experienceYears || 0) - (a.experienceYears || 0);
         case 'recent':
           return new Date(b.createdAt || 0) - new Date(a.createdAt || 0);
         default:
           return 0;
       }
     });
-  }, [workers, searchQuery, sortBy]);
+  }, [workers, searchQuery, sortBy, userLocation]);
 
   return (
     <>
@@ -103,7 +145,15 @@ const SearchWorkers = () => {
                 Connect with verified professionals in your area
               </p>
             </div>
-            <div className="flex gap-3">
+            <div className="flex flex-wrap gap-3">
+              <button
+                onClick={handleGetLocation}
+                disabled={isLocating}
+                className="btn-outline flex items-center gap-2 border-primary-500 text-primary-600 hover:bg-primary-50"
+              >
+                <MapPin className="w-4 h-4" />
+                {isLocating ? 'Locating...' : (userLocation ? 'Location Set' : 'Use My Location')}
+              </button>
               <button
                 onClick={() => setIsCommandOpen(true)}
                 className="btn-primary flex items-center gap-2 shadow-glow"
@@ -114,7 +164,7 @@ const SearchWorkers = () => {
               {selectedSkill && (
                 <button
                   type="button"
-                  className="btn-outline"
+                  className="btn-outline text-destructive hover:bg-destructive-50 hover:text-destructive border-destructive"
                   onClick={() => {
                     setSelectedSkill('');
                     setWorkers([]);
@@ -127,11 +177,11 @@ const SearchWorkers = () => {
             </div>
           </div>
 
-          {/* Search Bar */}
+          {/* Search Bar & View Toggles */}
           <div className="relative">
-            <div className="card-glass p-6">
-              <div className="flex flex-col lg:flex-row gap-4">
-                <div className="flex-1 relative">
+            <div className="card-glass p-4 lg:p-6">
+              <div className="flex flex-col lg:flex-row gap-4 items-center">
+                <div className="flex-1 w-full relative">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-secondary-400" />
                   <input
                     type="text"
@@ -141,15 +191,39 @@ const SearchWorkers = () => {
                     className="w-full pl-10 pr-4 py-3 bg-white/80 backdrop-blur-sm border border-white/20 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
                   />
                 </div>
+                
                 <select
                   value={sortBy}
                   onChange={(e) => setSortBy(e.target.value)}
-                  className="px-4 py-3 bg-white/80 backdrop-blur-sm border border-white/20 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+                  className="w-full lg:w-48 px-4 py-3 bg-white/80 backdrop-blur-sm border border-white/20 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
                 >
+                  {userLocation && <option value="distance">Nearest First</option>}
                   <option value="rating">Top Rated</option>
                   <option value="experience">Most Experience</option>
                   <option value="recent">Recently Added</option>
                 </select>
+
+                {/* View Toggles */}
+                {selectedSkill && (
+                  <div className="flex bg-secondary-100 p-1 rounded-xl w-full lg:w-auto">
+                    <button
+                      onClick={() => setViewMode('list')}
+                      className={`flex-1 flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all ${
+                        viewMode === 'list' ? 'bg-white shadow-sm text-primary-600' : 'text-secondary-500 hover:text-secondary-700'
+                      }`}
+                    >
+                      <List className="w-4 h-4" /> List
+                    </button>
+                    <button
+                      onClick={() => setViewMode('map')}
+                      className={`flex-1 flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all ${
+                        viewMode === 'map' ? 'bg-white shadow-sm text-primary-600' : 'text-secondary-500 hover:text-secondary-700'
+                      }`}
+                    >
+                      <MapIcon className="w-4 h-4" /> Map
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -172,7 +246,11 @@ const SearchWorkers = () => {
                   <button
                     key={c.key}
                     type="button"
-                    onClick={() => setSelectedSkill(c.key)}
+                    onClick={() => {
+                        setSelectedSkill(c.key);
+                        // Default to closest sorting if location enabled
+                        if(userLocation) setSortBy('distance');
+                    }}
                     className="card-glass p-6 text-left group hover:scale-105 transition-all duration-300"
                   >
                     <div className="flex items-start justify-between mb-3">
@@ -197,7 +275,7 @@ const SearchWorkers = () => {
             <div className="animate-spin w-8 h-8 border-3 border-primary/30 border-t-primary rounded-full" />
           </div>
         ) : (
-          <div className="space-y-6">
+          <div className="space-y-6 animate-fade-in">
             {/* Results Header */}
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-4">
@@ -207,43 +285,64 @@ const SearchWorkers = () => {
                 <span className="bg-secondary-100 text-secondary-700 px-3 py-1 rounded-full text-sm font-medium">
                   {filteredAndSortedWorkers.length} found
                 </span>
+                {userLocation && (
+                    <span className="bg-success-100 text-success-700 px-3 py-1 rounded-full text-sm font-medium flex items-center gap-1">
+                      <MapPin className="w-3 h-3" /> Location Enabled
+                    </span>
+                )}
               </div>
               
               {filteredAndSortedWorkers.length > 0 && (
-                <div className="flex items-center gap-2 text-sm text-secondary-600">
+                <div className="hidden sm:flex items-center gap-2 text-sm text-secondary-600">
                   <Star className="w-4 h-4 text-accent-500" />
-                  <span>Avg. Rating: {filteredAndSortedWorkers.reduce((acc, w) => acc + (w.rating || 4.5), 0) / filteredAndSortedWorkers.length.toFixed(1)}</span>
+                  <span>Avg. Rating: {(filteredAndSortedWorkers.reduce((acc, w) => acc + (w.stats?.averageRating || 4.5), 0) / filteredAndSortedWorkers.length).toFixed(1)}</span>
                 </div>
               )}
             </div>
 
-            {/* Workers Grid */}
-            {filteredAndSortedWorkers.length > 0 ? (
-              <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                {filteredAndSortedWorkers.map((w) => (
-                  <WorkerCard key={w._id} worker={w} />
-                ))}
-              </div>
+            {/* Map View or List View */}
+            {viewMode === 'map' && selectedSkill ? (
+              <MapDiscovery 
+                selectedSkill={selectedSkill}
+                onWorkerSelect={(worker) => {
+                  // Handle worker selection - could open modal or navigate to profile
+                  console.log('Selected worker:', worker);
+                }}
+              />
             ) : (
-              <div className="card-glass p-12 text-center">
-                <div className="w-16 h-16 bg-secondary-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <Users className="w-8 h-8 text-secondary-400" />
-                </div>
-                <h3 className="text-xl font-semibold text-secondary-900 mb-2">
-                  {searchQuery ? 'No workers match your search' : 'No workers currently online'}
-                </h3>
-                <p className="text-secondary-600 mb-4">
-                  {searchQuery ? 'Try adjusting your search terms' : 'Try another category or check again later'}
-                </p>
-                {searchQuery && (
-                  <button
-                    onClick={() => setSearchQuery('')}
-                    className="btn-outline"
-                  >
-                    Clear Search
-                  </button>
+              <div>
+                {/* Empty State */}
+                {filteredAndSortedWorkers.length === 0 && (
+                  <div className="card-glass p-12 text-center">
+                    <div className="w-16 h-16 bg-secondary-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <Users className="w-8 h-8 text-secondary-400" />
+                    </div>
+                    <h3 className="text-xl font-semibold text-secondary-900 mb-2">
+                      {searchQuery ? 'No workers match your search' : 'No workers currently online'}
+                    </h3>
+                    <p className="text-secondary-600 mb-4">
+                      {searchQuery ? 'Try adjusting your search terms' : 'Try another category or check again later'}
+                    </p>
+                    {searchQuery && (
+                      <button
+                        onClick={() => setSearchQuery('')}
+                        className="btn-outline"
+                      >
+                        Clear Search
+                      </button>
+                    )}
+                  </div>
                 )}
-              </div>
+
+                {/* Worker Grid */}
+                {filteredAndSortedWorkers.length > 0 && (
+                  <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                    {filteredAndSortedWorkers.map((worker) => (
+                      <WorkerCard key={worker._id} worker={worker} />
+                    ))}
+                  </div>
+                )}
+              </>
             )}
           </div>
         )}
@@ -253,4 +352,5 @@ const SearchWorkers = () => {
 };
 
 export default SearchWorkers;
+
 

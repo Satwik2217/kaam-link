@@ -51,3 +51,21 @@ export const protect = async (req, res, next) => {
   }
 };
 
+/**
+ * Authorizes access based on user roles.
+ * Must be used after the protect middleware.
+ */
+export const authorize = (...roles) => {
+  return (req, res, next) => {
+    if (!req.user) {
+      return next(new ApiError(401, 'Not authorized. Please log in.'));
+    }
+
+    if (!roles.includes(req.user.role)) {
+      return next(new ApiError(403, `User role ${req.user.role} is not authorized to access this route.`));
+    }
+
+    next();
+  };
+};
+

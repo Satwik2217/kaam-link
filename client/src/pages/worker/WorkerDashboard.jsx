@@ -2,6 +2,7 @@ import React, { useMemo, useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { useLanguage } from '@/context/LanguageContext';
 import axiosInstance from '@/api/axiosInstance';
+import { Link } from 'react-router-dom';
 import SOSButton from '@/components/common/SOSButton';
 import { Briefcase, Star, DollarSign, CheckCircle, ShieldCheck, AlertCircle, TrendingUp, Users, Calendar, Clock, Activity, Zap, Target } from 'lucide-react';
 
@@ -30,6 +31,12 @@ const WorkerDashboard = () => {
     setIsUpdatingOnline(true);
     try {
       await axiosInstance.put('/workers/my-profile', { isOnline: next });
+      
+      // If going online, update location with GPS
+      if (next) {
+        await updateWorkerLocation();
+      }
+      
       // Refresh auth state so other components see updated workerProfile flags
       await checkAuthStatus();
     } catch (e) {
@@ -37,6 +44,40 @@ const WorkerDashboard = () => {
       setIsOnline(!next);
     } finally {
       setIsUpdatingOnline(false);
+    }
+  };
+
+  const updateWorkerLocation = async () => {
+    try {
+      // Try to get GPS location
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          async (position) => {
+            const { latitude, longitude } = position.coords;
+            try {
+              await axiosInstance.put('/api/v1/map/update-location', {
+                lat: latitude,
+                lng: longitude
+              });
+              console.log('Worker location updated successfully');
+            } catch (error) {
+              console.error('Failed to update location:', error);
+              // Don't fail the online toggle if location update fails
+            }
+          },
+          (error) => {
+            console.log('GPS permission denied or unavailable, using stored location');
+            // Fallback to stored address coordinates (already handled by backend)
+          },
+          {
+            enableHighAccuracy: true,
+            timeout: 10000,
+            maximumAge: 300000 // 5 minutes
+          }
+        );
+      }
+    } catch (error) {
+      console.error('Location tracking error:', error);
     }
   };
 
@@ -57,9 +98,9 @@ const WorkerDashboard = () => {
                 </p>
               </div>
             </div>
-            <a href="/worker/kyc" className="btn-accent shadow-glow-accent whitespace-nowrap">
+            <Link to="/worker/kyc" className="btn-accent shadow-glow-accent whitespace-nowrap">
               Complete KYC Now
-            </a>
+            </Link>
           </div>
         </div>
       )}
@@ -301,16 +342,16 @@ const WorkerDashboard = () => {
           ].map((action) => {
             const Icon = action.icon;
             return (
-              <a
+              <Link
                 key={action.label}
-                href={action.href}
+                to={action.href}
                 className="flex flex-col items-center gap-3 p-4 rounded-xl bg-white/60 hover:bg-white/80 border border-white/20 transition-all duration-300 group"
               >
                 <div className={`w-12 h-12 bg-${action.color}-100 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform`}>
                   <Icon className={`w-6 h-6 text-${action.color}-600`} />
                 </div>
                 <span className="text-sm font-medium text-secondary-700">{action.label}</span>
-              </a>
+              </Link>
             );
           })}
         </div>

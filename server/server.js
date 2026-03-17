@@ -8,6 +8,7 @@ import authRoutes from './routes/auth.routes.js';
 import userRoutes from './routes/user.routes.js';
 import workerRoutes from './routes/worker.routes.js';
 import bookingRoutes from './routes/booking.routes.js';
+import mapRoutes from './routes/map.routes.js';
 import { errorHandler, notFound } from './middleware/error.middleware.js';
 import dns from 'node:dns';
 dns.setServers(['8.8.8.8', '8.8.4.4']); // Force Google DNS
@@ -55,6 +56,7 @@ app.use('/api/v1/auth', authRoutes);
 app.use('/api/v1/users', userRoutes);
 app.use('/api/v1/workers', workerRoutes);
 app.use('/api/v1/bookings', bookingRoutes);
+app.use('/api/v1/map', mapRoutes);
 
 // --- Error Handling Middleware (must be last) ---
 app.use(notFound);

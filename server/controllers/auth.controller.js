@@ -51,8 +51,9 @@ export const signup = async (req, res, next) => {
         isOnline: false,
       });
       // Link WorkerProfile back to User
-      newUser.workerProfile = workerProfile._id;
-      await newUser.save();
+      // newUser.workerProfile = workerProfile._id;
+      // await newUser.save();
+      await User.findByIdAndUpdate(newUser._id, { workerProfile: workerProfile._id });
     }
 
     // Generate JWT and set HttpOnly cookie
