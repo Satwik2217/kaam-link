@@ -151,6 +151,10 @@ const userSchema = new mongoose.Schema(
       expiresAt: { type: Date, select: false },
     },
 
+    // --- Password Reset Fields ---
+    resetToken: { type: String, select: false },
+    resetTokenExpiresAt: { type: Date, select: false },
+
     // --- WorkerProfile reference (only populated if role === 'worker') ---
     workerProfile: {
       type: mongoose.Schema.Types.ObjectId,

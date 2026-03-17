@@ -129,7 +129,7 @@ const MapDiscovery = ({ selectedSkill, onWorkerSelect }) => {
     }, 600);
 
     try {
-      const response = await axiosInstance.get('/api/v1/map/nearby-workers', {
+      const response = await axiosInstance.get('/map/nearby-workers', {
         params: {
           lat: userLocation.lat,
           lng: userLocation.lng,
