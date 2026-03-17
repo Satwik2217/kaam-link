@@ -58,10 +58,10 @@ const LoginPage = () => {
             </span>
           </Link>
           <h1 className="font-display text-2xl font-bold text-gray-900 mt-6">
-            {t('nav.login') === 'nav.login' ? 'Welcome back' : t('nav.login')}
+            {t('login.welcome')}
           </h1>
           <p className="text-gray-500 text-sm mt-1">
-            Log in to continue to KaamLink
+            {t('login.subtitle')}
           </p>
         </div>
 
@@ -74,7 +74,7 @@ const LoginPage = () => {
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                Mobile Number
+                {t('login.mobile')}
               </label>
               <div className="relative">
                 <Phone
@@ -89,7 +89,7 @@ const LoginPage = () => {
                   type="tel"
                   value={formData.phone}
                   onChange={handleChange}
-                  placeholder="9876543210"
+                  placeholder={t('login.mobilePlaceholder')}
                   required
                   maxLength={10}
                   className="input-field pl-20"
@@ -100,13 +100,13 @@ const LoginPage = () => {
             <div>
               <div className="flex items-center justify-between mb-1.5">
                 <label className="block text-sm font-medium text-gray-700">
-                  Password
+                  {t('login.password')}
                 </label>
                 <Link
                   to="/forgot-password"
                   className="text-xs text-primary hover:underline"
                 >
-                  Forgot password?
+                  {t('login.forgotPassword')}
                 </Link>
               </div>
               <div className="relative">
@@ -119,7 +119,7 @@ const LoginPage = () => {
                   type={showPassword ? 'text' : 'password'}
                   value={formData.password}
                   onChange={handleChange}
-                  placeholder="Enter your password"
+                  placeholder={t('login.passwordPlaceholder')}
                   required
                   className="input-field pl-9 pr-10"
                 />
@@ -140,7 +140,7 @@ const LoginPage = () => {
               {isLoading ? (
                 <>
                   <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />{' '}
-                  Logging in...
+                  {t('login.loggingIn')}
                 </>
               ) : (
                 <>
@@ -150,7 +150,7 @@ const LoginPage = () => {
             </button>
           </form>
           <p className="text-center text-sm text-gray-500 mt-6">
-            New to KaamLink?{' '}
+            {t('login.newTo')}{' '}
             <Link
               to="/signup"
               className="text-primary font-semibold hover:underline"

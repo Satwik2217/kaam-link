@@ -82,10 +82,10 @@ const SignupPage = () => {
             </span>
           </Link>
           <h1 className="font-display text-2xl font-bold text-gray-900 mt-6">
-            {t('nav.signup') === 'nav.signup' ? 'Create your account' : t('nav.signup')}
+            {t('signup.createAccount')}
           </h1>
           <p className="text-gray-500 text-sm mt-1">
-            Join thousands using KaamLink across India
+            {t('signup.subtitle')}
           </p>
         </div>
 
@@ -103,7 +103,7 @@ const SignupPage = () => {
                   : 'text-gray-500 hover:text-gray-700'
               }`}
             >
-              <Building2 size={16} /> I'm Hiring
+              <Building2 size={16} /> {t('signup.hiring')}
             </button>
             <button
               type="button"
@@ -114,7 +114,7 @@ const SignupPage = () => {
                   : 'text-gray-500 hover:text-gray-700'
               }`}
             >
-              <UserCheck size={16} /> I'm a Worker
+              <UserCheck size={16} /> {t('signup.worker')}
             </button>
           </div>
 
@@ -128,7 +128,7 @@ const SignupPage = () => {
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                Full Name
+                {t('signup.fullName')}
               </label>
               <div className="relative">
                 <User
@@ -140,7 +140,7 @@ const SignupPage = () => {
                   type="text"
                   value={formData.fullName}
                   onChange={handleChange}
-                  placeholder="Rahul Kumar"
+                  placeholder={t('signup.fullNamePlaceholder')}
                   required
                   className="input-field pl-9"
                 />
@@ -148,7 +148,7 @@ const SignupPage = () => {
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                Mobile Number
+                {t('login.mobile')}
               </label>
               <div className="relative">
                 <Phone
@@ -163,7 +163,7 @@ const SignupPage = () => {
                   type="tel"
                   value={formData.phone}
                   onChange={handleChange}
-                  placeholder="9876543210"
+                  placeholder={t('login.mobilePlaceholder')}
                   required
                   maxLength={10}
                   className="input-field pl-20"
@@ -172,21 +172,21 @@ const SignupPage = () => {
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                Email{' '}
-                <span className="text-gray-400 font-normal">(optional)</span>
+                {t('signup.email')}{' '}
+                <span className="text-gray-400 font-normal">{t('signup.optional')}</span>
               </label>
               <input
                 name="email"
                 type="email"
                 value={formData.email}
                 onChange={handleChange}
-                placeholder="rahul@email.com"
+                placeholder={t('signup.emailPlaceholder')}
                 className="input-field"
               />
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                Password
+                {t('login.password')}
               </label>
               <div className="relative">
                 <Lock
@@ -198,7 +198,7 @@ const SignupPage = () => {
                   type={showPassword ? 'text' : 'password'}
                   value={formData.password}
                   onChange={handleChange}
-                  placeholder="Min. 8 characters"
+                  placeholder={t('signup.passwordPlaceholder')}
                   required
                   className="input-field pl-9 pr-10"
                 />
@@ -220,36 +220,37 @@ const SignupPage = () => {
               {isLoading ? (
                 <>
                   <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />{' '}
-                  Creating account...
+                  {t('signup.creating')}
                 </>
               ) : (
                 <>
-                  Create Account <ArrowRight size={16} />
+                  {t('signup.createBtn')} <ArrowRight size={16} />
                 </>
               )}
             </button>
           </form>
 
           <p className="text-center text-sm text-gray-500 mt-6">
-            Already have an account?{' '}
+            {t('signup.alreadyHave')}{' '}
             <Link
               to="/login"
               className="text-primary font-semibold hover:underline"
             >
-              Log in
+              {t('nav.login')}
             </Link>
           </p>
         </div>
 
         <p className="text-center text-xs text-gray-400 mt-4">
-          By signing up, you agree to our{' '}
+          {t('signup.agree')}{' '}
           <Link to="/terms" className="text-primary hover:underline">
-            Terms of Service
+            {t('signup.terms')}
           </Link>{' '}
-          and{' '}
+          {t('signup.and')}{' '}
           <Link to="/privacy" className="text-primary hover:underline">
-            Privacy Policy
+            {t('signup.privacy')}
           </Link>
+          {t('signup.agreeEnd') ? ` ${t('signup.agreeEnd')}` : ''}
         </p>
       </div>
     </div>
