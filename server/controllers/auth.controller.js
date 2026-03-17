@@ -165,12 +165,14 @@ export const logout = (req, res) => {
 // ==============================================================
 export const getMe = async (req, res, next) => {
   try {
-    // req.user is set by the protect middleware
-    // Populate workerProfile if the user is a worker
-    const user = await User.findById(req.user._id).populate(
-      'workerProfile',
-      '-reviews'
-    ); // Exclude reviews for brevity in /me
+    // req.user is set by protect middleware
+    // Populate workerProfile if user is a worker, exclude sensitive fields
+    const user = await User.findById(req.user._id)
+      .populate({
+        path: 'workerProfile',
+        select: '-reviews' // Exclude reviews for brevity in /me
+      })
+      .select('-password -otp'); // Exclude sensitive fields from main user document
 
     if (!user) {
       return next(new ApiError(404, 'User not found.'));
