@@ -67,6 +67,7 @@ export const signup = async (req, res, next) => {
         email: newUser.email,
         role: newUser.role,
         verificationStatus: newUser.verificationStatus,
+        kycStatus: newUser.kycStatus,
         workerProfile: newUser.workerProfile,
         createdAt: newUser.createdAt,
       },
@@ -115,7 +116,7 @@ export const login = async (req, res, next) => {
 
     // Update last login timestamp
     user.lastLoginAt = new Date();
-    await user.save({ validateBeforeSave: false }); // Skip full validation on simple update
+    await User.updateOne({ _id: user._id }, { $set: { lastLoginAt: user.lastLoginAt } });
 
     // Generate JWT and set cookie
     const token = generateTokenAndSetCookie(res, user._id, user.role);
@@ -131,6 +132,7 @@ export const login = async (req, res, next) => {
         email: user.email,
         role: user.role,
         verificationStatus: user.verificationStatus,
+        kycStatus: user.kycStatus,
         workerProfile: user.workerProfile,
         lastLoginAt: user.lastLoginAt,
       },

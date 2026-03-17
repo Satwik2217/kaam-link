@@ -1,14 +1,19 @@
+import dotenv from 'dotenv';
 import express from 'express';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import morgan from 'morgan';
-import dotenv from 'dotenv';
 import { connectDB } from './config/db.js';
 import authRoutes from './routes/auth.routes.js';
 import userRoutes from './routes/user.routes.js';
 import workerRoutes from './routes/worker.routes.js';
 import bookingRoutes from './routes/booking.routes.js';
 import { errorHandler, notFound } from './middleware/error.middleware.js';
+import dns from 'node:dns';
+dns.setServers(['8.8.8.8', '8.8.4.4']); // Force Google DNS
+import { setServers } from 'node:dns/promises';
+setServers(['1.1.1.1', '8.8.8.8']); // Bypasses the Windows DNS bug
+dns.setDefaultResultOrder('ipv4first');
 
 dotenv.config();
 

@@ -71,6 +71,42 @@ const userSchema = new mongoose.Schema(
       type: String,
       default: null,
     },
+    // Feature A: Worker KYC & Bank Details
+    aadhaarNumber: {
+      type: String,
+      select: false,
+      trim: true,
+      match: [/^\d{12}$/, 'Aadhaar must be exactly 12 digits'],
+    },
+    last4Aadhaar: {
+      type: String,
+      default: null,
+    },
+    bankAccount: {
+      holderName: { type: String, trim: true, select: false },
+      accountNumber: {
+        type: String,
+        trim: true,
+        select: false,
+        match: [/^\d{9,18}$/, 'Account number must be between 9 and 18 digits'],
+      },
+      ifsc: {
+        type: String,
+        trim: true,
+        select: false,
+        match: [/^[A-Z]{4}0[A-Z0-9]{6}$/, 'Please enter a valid IFSC code'],
+      },
+      bankName: { type: String, trim: true, select: false },
+      upiId: { type: String, trim: true, select: false },
+    },
+    kycStatus: {
+      type: String,
+      enum: ['not_submitted', 'pending_review', 'verified', 'rejected'],
+      default: 'not_submitted',
+    },
+    kycSubmittedAt: { type: Date, default: null },
+    kycVerifiedAt: { type: Date, default: null },
+    kycRejectionReason: { type: String, default: null },
 
     // --- Profile ---
     profilePicture: {
@@ -173,6 +209,23 @@ userSchema.methods.toPublicProfile = function () {
   delete obj.otp;
   delete obj.governmentIdUrl;
   delete obj.adminVerificationNotes;
+
+  // Ensure we don't return sensitive Aadhaar or precise bank data
+  delete obj.aadhaarNumber;
+
+  // Add a safe summary of bank details and kyc status
+  const hasBank = !!(this.bankAccount?.accountNumber);
+  obj.isBankDetailsPresent = hasBank;
+
+  // Provide masked bank account if present (e.g. ****1234)
+  if (hasBank) {
+    const acctNum = this.bankAccount.accountNumber;
+    if (acctNum) {
+      obj.bankAccountMasked = '****' + acctNum.slice(-4);
+    }
+  }
+  delete obj.bankAccount; // Delete the raw bankAccount object entirely
+
   return obj;
 };
 

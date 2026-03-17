@@ -4,7 +4,7 @@ import axiosInstance from '@/api/axiosInstance';
 import { User, Mail, Phone, MapPin, Calendar, Shield } from 'lucide-react';
 
 const ProfilePage = () => {
-  const { user, login } = useAuth(); // login function can also be used to update local auth context if it accepts user object, or we just reload. Wait, useAuth might have an update function, but we can just use window.location.reload() or let context handle it. Actually, login sets user, so we can't easily update just user unless we have an updateUser method. Let's see later.
+  const { user, login, logout } = useAuth(); // Extract logout to handle delete session
   
   const [formData, setFormData] = useState({
     fullName: '',
@@ -14,6 +14,8 @@ const ProfilePage = () => {
     dateOfBirth: '',
   });
   const [isLoading, setIsLoading] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [message, setMessage] = useState({ type: '', text: '' });
 
   useEffect(() => {
@@ -50,6 +52,27 @@ const ProfilePage = () => {
       });
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleDeleteAccount = async () => {
+    setIsDeleting(true);
+    try {
+      const { data } = await axiosInstance.delete('/users/profile');
+      if (data.success) {
+        // Close modal and call logout context to clear client session and redirect
+        setIsDeleteModalOpen(false);
+        await logout();
+        window.location.href = '/'; // Ensure hard redirect to home
+      }
+    } catch (error) {
+      setMessage({
+        type: 'error',
+        text: error.response?.data?.message || 'Failed to delete account',
+      });
+      setIsDeleteModalOpen(false);
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -186,8 +209,50 @@ const ProfilePage = () => {
               </div>
             </form>
           </div>
+          
+          {/* Danger Zone */}
+          <div className="card p-6 mt-6 border-red-100 border-2">
+            <h2 className="text-lg font-bold text-red-600 mb-2">Danger Zone</h2>
+            <p className="text-sm text-gray-600 mb-4">
+              Permanently delete your account and all associated data. This action cannot be undone.
+            </p>
+            <button 
+              onClick={() => setIsDeleteModalOpen(true)}
+              className="px-4 py-2 border border-red-600 text-red-600 rounded-lg hover:bg-red-50 font-medium transition-colors"
+            >
+              Delete Account
+            </button>
+          </div>
         </div>
       </div>
+
+      {/* Delete Confirmation Modal */}
+      {isDeleteModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+          <div className="bg-white rounded-xl shadow-xl max-w-md w-full p-6 animate-fade-in">
+            <h3 className="text-xl font-bold text-gray-900 mb-2">Delete Account</h3>
+            <p className="text-gray-600 mb-6">
+              Are you sure you want to delete your account? All of your data, including your profile, bookings, and history will be permanently erased. This action cannot be undone.
+            </p>
+            <div className="flex justify-end gap-3">
+              <button 
+                onClick={() => setIsDeleteModalOpen(false)}
+                disabled={isDeleting}
+                className="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors font-medium"
+              >
+                Cancel
+              </button>
+              <button 
+                onClick={handleDeleteAccount}
+                disabled={isDeleting}
+                className="px-4 py-2 bg-red-600 text-white hover:bg-red-700 rounded-lg transition-colors font-medium flex items-center justify-center min-w-[100px]"
+              >
+                {isDeleting ? 'Deleting...' : 'Yes, Delete'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
