@@ -2,6 +2,72 @@ import WorkerProfile from '../models/WorkerProfile.model.js';
 import User from '../models/User.model.js';
 import ApiError from '../utils/ApiError.js';
 
+const isWorkerProfileComplete = ({ user, workerProfile }) => {
+  // KYC + bank (stored on User)
+  const hasAadhaar = !!user?.aadhaarNumber && /^\d{12}$/.test(user.aadhaarNumber);
+  const bank = user?.bankAccount || {};
+  const hasBank =
+    !!bank?.holderName &&
+    typeof bank.holderName === 'string' &&
+    bank.holderName.trim().length >= 2 &&
+    !!bank?.accountNumber &&
+    /^\d{9,18}$/.test(bank.accountNumber) &&
+    !!bank?.ifsc &&
+    /^[A-Z]{4}0[A-Z0-9]{6}$/.test(String(bank.ifsc).toUpperCase());
+
+  // Skills + work readiness (stored on WorkerProfile)
+  const skill = workerProfile?.primarySkill;
+  const hasPrimarySkill = !!skill && skill !== 'other';
+  const hasExperience =
+    workerProfile?.experienceYears !== undefined &&
+    workerProfile?.experienceYears !== null &&
+    Number.isFinite(Number(workerProfile.experienceYears)) &&
+    Number(workerProfile.experienceYears) >= 0;
+  const wage = workerProfile?.wageRate || {};
+  const hasWage =
+    wage?.amount !== undefined &&
+    wage?.amount !== null &&
+    Number.isFinite(Number(wage.amount)) &&
+    Number(wage.amount) >= 100 &&
+    !!wage?.unit;
+  const hasLanguages =
+    Array.isArray(workerProfile?.languages) && workerProfile.languages.length > 0;
+  const availability = workerProfile?.availability || {};
+  const hasAvailabilityConfig =
+    availability?.isAvailable !== undefined &&
+    Array.isArray(availability?.availableDays) &&
+    availability.availableDays.length > 0 &&
+    typeof availability?.availableTimeStart === 'string' &&
+    typeof availability?.availableTimeEnd === 'string';
+
+  return (
+    hasAadhaar &&
+    hasBank &&
+    hasPrimarySkill &&
+    hasExperience &&
+    hasWage &&
+    hasLanguages &&
+    hasAvailabilityConfig
+  );
+};
+
+const recomputeAndPersistProfileCompleteness = async ({ userId }) => {
+  // Select sensitive fields needed for computation.
+  const user = await User.findById(userId).select('+aadhaarNumber +bankAccount');
+  if (!user) return null;
+  const workerProfile = await WorkerProfile.findOne({ userId });
+  if (!workerProfile) return null;
+
+  const computed = isWorkerProfileComplete({ user, workerProfile });
+  if (workerProfile.isProfileComplete !== computed) {
+    await WorkerProfile.updateOne(
+      { _id: workerProfile._id },
+      { $set: { isProfileComplete: computed } }
+    );
+  }
+  return computed;
+};
+
 // @desc    Get all available workers with filtering (location, skill, rating)
 // @route   GET /api/v1/workers
 // @access  Public
@@ -9,7 +75,12 @@ export const getWorkers = async (req, res, next) => {
   try {
     const { skill, city, minRating, maxWage, page = 1, limit = 12 } = req.query;
 
-    const matchQuery = { 'availability.isAvailable': true };
+    // Real-world readiness: only show workers who are fully onboarded and online.
+    const matchQuery = {
+      isProfileComplete: true,
+      isOnline: true,
+      'availability.isAvailable': true,
+    };
     if (skill) matchQuery.primarySkill = skill;
     if (minRating) matchQuery['stats.averageRating'] = { $gte: parseFloat(minRating) };
     if (maxWage) matchQuery['wageRate.amount'] = { $lte: parseFloat(maxWage) };
@@ -69,6 +140,7 @@ export const updateMyWorkerProfile = async (req, res, next) => {
       'availability',
       'wageRate',
       'serviceRadius',
+      'isOnline',
       'jobTypePreference',
       'isOpenToLiveIn',
       'hasOwnTools',
@@ -88,6 +160,7 @@ export const updateMyWorkerProfile = async (req, res, next) => {
     );
 
     if (!updatedProfile) return next(new ApiError(404, 'Worker profile not found.'));
+    await recomputeAndPersistProfileCompleteness({ userId: req.user._id });
     res.status(200).json({ success: true, workerProfile: updatedProfile });
   } catch (error) {
     next(error);
@@ -135,6 +208,7 @@ export const submitKyc = async (req, res, next) => {
     );
 
     if (!user) return next(new ApiError(404, 'User not found'));
+    await recomputeAndPersistProfileCompleteness({ userId: req.user._id });
 
     res.status(200).json({
       success: true,

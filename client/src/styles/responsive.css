@@ -1,0 +1,254 @@
+/* Responsive Design Guidelines for KaamLink */
+
+/* Mobile-first approach with breakpoints:
+   - sm: 640px (small phones)
+   - md: 768px (large phones/tablets)
+   - lg: 1024px (laptops)
+   - xl: 1280px (desktops)
+   - 2xl: 1536px (large desktops)
+*/
+
+/* Component-specific responsive patterns */
+
+/* Navigation */
+.navbar-responsive {
+  @apply flex-col md:flex-row;
+  @apply px-4 md:px-6 lg:px-8;
+}
+
+.navbar-mobile-menu {
+  @apply hidden md:flex;
+}
+
+.navbar-mobile-open {
+  @apply flex flex-col md:hidden;
+}
+
+/* Cards and Grids */
+.card-grid-responsive {
+  @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4;
+  @apply gap-4 sm:gap-6;
+}
+
+.worker-card-responsive {
+  @apply p-4 sm:p-6;
+  @apply rounded-xl sm:rounded-2xl;
+}
+
+/* Forms */
+.form-responsive {
+  @apply grid grid-cols-1 lg:grid-cols-2;
+  @apply gap-4 sm:gap-6;
+}
+
+.form-field-responsive {
+  @apply w-full;
+}
+
+/* Buttons */
+.button-group-responsive {
+  @apply flex flex-col sm:flex-row;
+  @apply gap-3 sm:gap-4;
+}
+
+.button-responsive {
+  @apply w-full sm:w-auto;
+  @apply py-3 sm:py-4;
+  @apply px-6 sm:px-8;
+}
+
+/* Typography */
+.heading-responsive {
+  @apply text-2xl sm:text-3xl lg:text-4xl xl:text-5xl;
+}
+
+.subheading-responsive {
+  @apply text-lg sm:text-xl lg:text-2xl;
+}
+
+.text-responsive {
+  @apply text-sm sm:text-base;
+}
+
+/* Spacing */
+.section-responsive {
+  @apply py-8 sm:py-12 lg:py-16 xl:py-20;
+}
+
+.container-responsive {
+  @apply px-4 sm:px-6 lg:px-8;
+  @apply max-w-7xl mx-auto;
+}
+
+/* Modals */
+.modal-responsive {
+  @apply w-full max-w-lg sm:max-w-2xl;
+  @apply mx-4 sm:mx-auto;
+}
+
+.modal-content-responsive {
+  @apply max-h-[90vh] sm:max-h-[85vh];
+  @apply overflow-y-auto;
+}
+
+/* Dashboard */
+.dashboard-stats-responsive {
+  @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4;
+  @apply gap-4 sm:gap-6;
+}
+
+.dashboard-charts-responsive {
+  @apply grid grid-cols-1 lg:grid-cols-2;
+  @apply gap-6;
+}
+
+/* Search and Filters */
+.search-responsive {
+  @apply flex flex-col lg:flex-row;
+  @apply gap-4;
+}
+
+.filter-grid-responsive {
+  @apply grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4;
+  @apply gap-3;
+}
+
+/* Loading States */
+.skeleton-grid-responsive {
+  @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3;
+  @apply gap-6;
+}
+
+/* Hero Section */
+.hero-responsive {
+  @apply min-h-screen;
+  @apply flex items-center justify-center;
+  @apply px-4 sm:px-6 lg:px-8;
+}
+
+.hero-content-responsive {
+  @apply text-center;
+  @apply max-w-4xl mx-auto;
+}
+
+.hero-buttons-responsive {
+  @apply flex flex-col sm:flex-row;
+  @apply gap-4;
+  @apply justify-center;
+}
+
+/* Categories Grid */
+.categories-responsive {
+  @apply grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4;
+  @apply gap-4 sm:gap-6;
+}
+
+.category-card-responsive {
+  @apply p-4 sm:p-6;
+  @apply rounded-xl sm:rounded-2xl;
+}
+
+/* Trust Badges */
+.trust-badges-responsive {
+  @apply flex flex-col sm:flex-row;
+  @apply gap-3 sm:gap-4;
+  @apply justify-center;
+  @apply text-center sm:text-left;
+}
+
+/* Feature Cards */
+.features-responsive {
+  @apply grid grid-cols-1 md:grid-cols-3;
+  @apply gap-6 sm:gap-8;
+}
+
+.feature-card-responsive {
+  @apply p-6 sm:p-8;
+  @apply text-center sm:text-left;
+}
+
+/* Testimonials */
+.testimonials-responsive {
+  @apply grid grid-cols-1 md:grid-cols-2;
+  @apply gap-6;
+}
+
+.testimonial-card-responsive {
+  @apply p-6;
+  @apply rounded-2xl;
+}
+
+/* CTA Section */
+.cta-responsive {
+  @apply py-12 sm:py-16 lg:py-20;
+  @apply px-4 sm:px-6 lg:px-8;
+}
+
+.cta-content-responsive {
+  @apply text-center;
+  @apply max-w-4xl mx-auto;
+}
+
+.cta-buttons-responsive {
+  @apply flex flex-col sm:flex-row;
+  @apply gap-4;
+  @apply justify-center;
+}
+
+/* Footer */
+.footer-responsive {
+  @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4;
+  @apply gap-8;
+}
+
+.footer-section-responsive {
+  @apply space-y-4;
+}
+
+/* Mobile-specific optimizations */
+@media (max-width: 640px) {
+  .mobile-hidden {
+    @apply hidden;
+  }
+  
+  .mobile-full {
+    @apply w-full;
+  }
+  
+  .mobile-stack {
+    @apply flex-col;
+  }
+  
+  .mobile-center {
+    @apply text-center;
+  }
+}
+
+/* Touch-friendly targets */
+@media (pointer: coarse) {
+  .touch-target {
+    @apply min-h-[44px] min-w-[44px];
+  }
+}
+
+/* High DPI displays */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  .retina-ready {
+    @apply border-0;
+  }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .motion-reduce {
+    @apply transition-none;
+    animation: none !important;
+  }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .dark-mode-ready {
+    @apply bg-secondary-900 text-white;
+  }
+}

@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import axiosInstance from '@/api/axiosInstance';
 import WorkerCard from '@/components/worker/WorkerCard';
+import { SkeletonWorkerCard, EmptyStateWorkers } from '@/components/common/SkeletonLoader';
 
 const FindWorkers = () => {
   const [workers, setWorkers] = useState([]);
@@ -41,19 +42,18 @@ const FindWorkers = () => {
       </div>
 
       {isLoading ? (
-        <div className="flex justify-center py-12">
-          <div className="w-8 h-8 border-4 border-primary/30 border-t-primary rounded-full md:w-12 md:h-12 animate-spin" />
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          {[...Array(8)].map((_, i) => (
+            <SkeletonWorkerCard key={i} />
+          ))}
         </div>
+      ) : workers.length === 0 ? (
+        <EmptyStateWorkers />
       ) : (
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {workers.map((w) => (
             <WorkerCard key={w._id} worker={w} />
           ))}
-          {workers.length === 0 && (
-            <div className="col-span-full py-12 text-center text-gray-500">
-              No workers found yet. Check back soon!
-            </div>
-          )}
         </div>
       )}
     </div>

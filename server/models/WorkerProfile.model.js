@@ -40,6 +40,19 @@ const workerProfileSchema = new mongoose.Schema(
       unique: true, // One worker profile per user
     },
 
+    // --- Real-world readiness flags ---
+    // Worker is visible in search only when BOTH are true:
+    // - isProfileComplete: KYC + bank + skills fully provided
+    // - isOnline: worker explicitly toggled "Ready to work"
+    isProfileComplete: {
+      type: Boolean,
+      default: false,
+    },
+    isOnline: {
+      type: Boolean,
+      default: false,
+    },
+
     // --- Professional Skills ---
     primarySkill: {
       type: String,
@@ -198,6 +211,7 @@ workerProfileSchema.index({ primarySkill: 1 });
 workerProfileSchema.index({ 'stats.averageRating': -1 });
 workerProfileSchema.index({ 'availability.isAvailable': 1 });
 workerProfileSchema.index({ 'wageRate.amount': 1 });
+workerProfileSchema.index({ isProfileComplete: 1, isOnline: 1 });
 
 // --- MIDDLEWARE: Recalculate averageRating after review added ---
 workerProfileSchema.methods.recalculateRating = function () {

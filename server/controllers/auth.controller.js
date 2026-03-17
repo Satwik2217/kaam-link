@@ -46,6 +46,9 @@ export const signup = async (req, res, next) => {
         primarySkill: 'other', // Will be filled out in profile setup
         experienceYears: 0,
         wageRate: { amount: 500, unit: 'per_day' },
+        // Real-world readiness: workers should not be visible until fully onboarded + online.
+        isProfileComplete: false,
+        isOnline: false,
       });
       // Link WorkerProfile back to User
       newUser.workerProfile = workerProfile._id;

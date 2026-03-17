@@ -17,26 +17,48 @@ export default {
     },
     extend: {
       colors: {
-        // KaamLink Brand Colors
+        // KaamLink Brand Palette - Professional, Trustworthy, High-Tech
         primary: {
-          DEFAULT: '#E85D04', // Vibrant saffron-orange (trust, India)
+          DEFAULT: '#4F46E5', // Deep Indigo (trust, professional)
           foreground: '#FFFFFF',
-          50: '#FFF3E0',
-          100: '#FFE0B2',
-          500: '#E85D04',
-          600: '#D04E03',
-          700: '#B84302',
+          50: '#E8E7FF',
+          100: '#C7C2FF',
+          200: '#A59BFF',
+          300: '#8374FF',
+          400: '#634DE5',
+          500: '#4F46E5',
+          600: '#4338CA',
+          700: '#3730A3',
+          800: '#312E81',
+          900: '#1E1B4B',
         },
         secondary: {
-          DEFAULT: '#1B4332', // Deep forest green (growth, safety)
+          DEFAULT: '#64748B', // Soft Slate (modern, neutral)
           foreground: '#FFFFFF',
-          50: '#D8F3DC',
-          500: '#1B4332',
-          600: '#163729',
+          50: '#F8FAFC',
+          100: '#F1F5F9',
+          200: '#E2E8F0',
+          300: '#CBD5E1',
+          400: '#94A3B8',
+          500: '#64748B',
+          600: '#475569',
+          700: '#334155',
+          800: '#1E293B',
+          900: '#0F172A',
         },
         accent: {
-          DEFAULT: '#FFB703', // Warm gold (prosperity, premium)
-          foreground: '#1A1A1A',
+          DEFAULT: '#F97316', // Action Orange (energy, vibrant)
+          foreground: '#FFFFFF',
+          50: '#FFF7ED',
+          100: '#FFEDD5',
+          200: '#FED7AA',
+          300: '#FDBA74',
+          400: '#FB923C',
+          500: '#F97316',
+          600: '#EA580C',
+          700: '#C2410C',
+          800: '#9A3412',
+          900: '#7C2D12',
         },
         background: '#F8F9FA',
         surface: '#FFFFFF',
@@ -64,16 +86,27 @@ export default {
       },
       fontFamily: {
         sans: ['Inter', 'system-ui', 'sans-serif'],
-        display: ['Poppins', 'sans-serif'],
+        display: ['Inter', 'system-ui', 'sans-serif'],
+        mono: ['JetBrains Mono', 'Consolas', 'monospace'],
       },
       borderRadius: {
-        lg: '0.625rem',
-        md: 'calc(0.625rem - 2px)',
-        sm: 'calc(0.625rem - 4px)',
+        lg: '0.75rem',
+        md: '0.625rem',
+        sm: '0.5rem',
+        xl: '1rem',
+        '2xl': '1.5rem',
+        '3xl': '2rem',
       },
       boxShadow: {
-        card: '0 2px 8px rgba(0,0,0,0.08)',
-        'card-hover': '0 8px 24px rgba(0,0,0,0.12)',
+        'glass': '0 8px 32px rgba(0,0,0,0.08), 0 2px 8px rgba(0,0,0,0.04)',
+        'glass-hover': '0 12px 40px rgba(0,0,0,0.12), 0 4px 12px rgba(0,0,0,0.06)',
+        'card': '0 2px 8px rgba(0,0,0,0.06), 0 1px 3px rgba(0,0,0,0.04)',
+        'card-hover': '0 8px 24px rgba(0,0,0,0.1), 0 4px 8px rgba(0,0,0,0.06)',
+        'glow': '0 0 24px rgba(79, 70, 229, 0.15)',
+        'glow-accent': '0 0 24px rgba(249, 115, 22, 0.15)',
+      },
+      backdropBlur: {
+        xs: '2px',
       },
     },
   },
