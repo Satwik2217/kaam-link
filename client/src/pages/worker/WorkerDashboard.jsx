@@ -1,12 +1,33 @@
 import React from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import SOSButton from '@/components/common/SOSButton';
-import { Briefcase, Star, DollarSign, CheckCircle, ShieldCheck } from 'lucide-react';
+import { Briefcase, Star, DollarSign, CheckCircle, ShieldCheck, AlertCircle } from 'lucide-react';
 
 const WorkerDashboard = () => {
   const { user } = useAuth();
+  const kycStatus = user?.kycStatus || 'not_submitted';
+  const needsKyc = kycStatus === 'not_submitted' || kycStatus === 'rejected';
+
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
+      
+      {needsKyc && (
+        <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-8 flex flex-col md:flex-row items-center justify-between gap-4">
+          <div className="flex items-center gap-3 text-amber-800">
+            <AlertCircle className="w-6 h-6 flex-shrink-0" />
+            <div>
+              <h4 className="font-semibold">Complete Your KYC Verification</h4>
+              <p className="text-sm mt-0.5 opacity-90">
+                You must securely submit your Aadhaar and Bank Payout details before accepting jobs.
+              </p>
+            </div>
+          </div>
+          <a href="/worker/kyc" className="btn-primary whitespace-nowrap !bg-amber-600 hover:!bg-amber-700">
+            Complete KYC Now
+          </a>
+        </div>
+      )}
+
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
         <div>
           <h1 className="font-display text-2xl font-bold text-gray-900">

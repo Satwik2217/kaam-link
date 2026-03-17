@@ -12,10 +12,15 @@ import {
   User,
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
+import { useLanguage } from '@/context/LanguageContext';
+import { useLocation } from 'react-router-dom';
 
 const SignupPage = () => {
   const { signup } = useAuth();
+  const { t } = useLanguage();
   const navigate = useNavigate();
+  const location = useLocation();
+
   const [formData, setFormData] = useState({
     fullName: '',
     phone: '',
@@ -26,6 +31,15 @@ const SignupPage = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+
+  // Read role from URL query params on mount
+  React.useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const roleParam = params.get('role');
+    if (roleParam === 'worker' || roleParam === 'employer') {
+      setFormData(prev => ({ ...prev, role: roleParam }));
+    }
+  }, [location]);
 
   const handleChange = (e) => {
     setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
@@ -68,7 +82,7 @@ const SignupPage = () => {
             </span>
           </Link>
           <h1 className="font-display text-2xl font-bold text-gray-900 mt-6">
-            Create your account
+            {t('nav.signup') === 'nav.signup' ? 'Create your account' : t('nav.signup')}
           </h1>
           <p className="text-gray-500 text-sm mt-1">
             Join thousands using KaamLink across India

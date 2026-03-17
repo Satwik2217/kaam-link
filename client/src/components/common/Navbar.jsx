@@ -8,11 +8,14 @@ import {
   User,
   LayoutDashboard,
   ChevronDown,
+  Globe,
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
+import { useLanguage } from '@/context/LanguageContext';
 
 const Navbar = () => {
   const { isAuthenticated, user, logout } = useAuth();
+  const { currentLanguage, toggleLanguage, t } = useLanguage();
   const navigate = useNavigate();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -39,32 +42,41 @@ const Navbar = () => {
             </span>
           </Link>
 
-          {/* Desktop Nav */}
-          <nav className="hidden md:flex items-center gap-6">
-            <Link
-              to="/find-workers"
-              className="text-sm font-medium text-gray-600 hover:text-primary transition-colors"
-            >
-              Find Workers
-            </Link>
-            <Link
-              to="/how-it-works"
-              className="text-sm font-medium text-gray-600 hover:text-primary transition-colors"
-            >
-              How It Works
-            </Link>
-            <Link
-              to="/safety"
-              className="text-sm font-medium text-gray-600 hover:text-primary transition-colors"
-            >
-              Safety
-            </Link>
-          </nav>
+        {/* Desktop Nav */}
+        <nav className="hidden md:flex items-center gap-6">
+          <Link
+            to="/find-workers"
+            className="text-sm font-medium text-gray-600 hover:text-primary transition-colors"
+          >
+            {t('nav.findWorkers')}
+          </Link>
+          <Link
+            to="/how-it-works"
+            className="text-sm font-medium text-gray-600 hover:text-primary transition-colors"
+          >
+            {t('nav.howItWorks')}
+          </Link>
+          <Link
+            to="/safety"
+            className="text-sm font-medium text-gray-600 hover:text-primary transition-colors"
+          >
+            {t('nav.safety')}
+          </Link>
+        </nav>
 
-          {/* Auth Actions */}
-          <div className="hidden md:flex items-center gap-3">
-            {isAuthenticated && user ? (
-              <div className="relative">
+        {/* Auth Actions & Language */}
+        <div className="hidden md:flex items-center gap-3">
+          <button 
+            onClick={toggleLanguage}
+            className="flex items-center gap-1 text-sm font-medium text-gray-600 hover:text-primary px-2 py-1 rounded-md transition-colors"
+            title="Switch Language"
+          >
+            <Globe size={16} /> {currentLanguage === 'en' ? 'HI' : 'EN'}
+          </button>
+          <div className="w-px h-6 bg-border mx-2"></div>
+          
+          {isAuthenticated && user ? (
+            <div className="relative">
                 <button
                   type="button"
                   onClick={() => setIsDropdownOpen(!isDropdownOpen)}
@@ -108,10 +120,10 @@ const Navbar = () => {
             ) : (
               <>
                 <Link to="/login" className="btn-outline py-2 px-4 text-sm">
-                  Log In
+                  {t('nav.login')}
                 </Link>
                 <Link to="/signup" className="btn-primary py-2 px-4 text-sm">
-                  Get Started
+                  {t('nav.signup')}
                 </Link>
               </>
             )}
@@ -131,19 +143,28 @@ const Navbar = () => {
       {/* Mobile Menu */}
       {isMenuOpen && (
         <div className="md:hidden border-t border-border bg-white px-4 py-4 space-y-3">
+          <div className="flex items-center justify-between pb-2 border-b border-border">
+             <span className="text-sm text-gray-500">Language</span>
+             <button 
+                onClick={toggleLanguage}
+                className="flex items-center gap-2 text-sm font-medium text-primary px-3 py-1.5 rounded-lg bg-primary/10 transition-colors"
+              >
+                <Globe size={16} /> {currentLanguage === 'en' ? 'हिन्दी (Hindi)' : 'English'}
+              </button>
+          </div>
           <Link
             to="/find-workers"
             className="block py-2 text-sm font-medium text-gray-700"
             onClick={() => setIsMenuOpen(false)}
           >
-            Find Workers
+            {t('nav.findWorkers')}
           </Link>
           <Link
             to="/how-it-works"
             className="block py-2 text-sm font-medium text-gray-700"
             onClick={() => setIsMenuOpen(false)}
           >
-            How It Works
+            {t('nav.howItWorks')}
           </Link>
           {isAuthenticated ? (
             <>
@@ -169,14 +190,14 @@ const Navbar = () => {
                 className="btn-outline text-sm flex-1 text-center"
                 onClick={() => setIsMenuOpen(false)}
               >
-                Log In
+                {t('nav.login')}
               </Link>
               <Link
                 to="/signup"
                 className="btn-primary text-sm flex-1 text-center"
                 onClick={() => setIsMenuOpen(false)}
               >
-                Sign Up
+                 {t('nav.signup')}
               </Link>
             </div>
           )}

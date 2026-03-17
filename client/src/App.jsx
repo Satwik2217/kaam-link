@@ -11,6 +11,7 @@ import SignupPage from '@/pages/auth/SignupPage';
 import ForgotPasswordPage from '@/pages/auth/ForgotPasswordPage';
 import WorkerDashboard from '@/pages/worker/WorkerDashboard';
 import WorkerProfileSetup from '@/pages/worker/WorkerProfileSetup';
+import WorkerKycSetup from '@/pages/worker/WorkerKycSetup';
 import WorkerMyBookings from '@/pages/worker/WorkerMyBookings';
 import EmployerDashboard from '@/pages/employer/EmployerDashboard';
 import SearchWorkers from '@/pages/employer/SearchWorkers';
@@ -131,6 +132,16 @@ function App() {
               <ProtectedRoute role="worker">
                 <LayoutWithNav>
                   <WorkerProfileSetup />
+                </LayoutWithNav>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/worker/kyc"
+            element={
+              <ProtectedRoute role="worker">
+                <LayoutWithNav>
+                  <WorkerKycSetup />
                 </LayoutWithNav>
               </ProtectedRoute>
             }

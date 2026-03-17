@@ -2,9 +2,11 @@ import React, { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Eye, EyeOff, Briefcase, Phone, Lock, ArrowRight } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
+import { useLanguage } from '@/context/LanguageContext';
 
 const LoginPage = () => {
   const { login } = useAuth();
+  const { t } = useLanguage();
   const navigate = useNavigate();
   const location = useLocation();
   const from = location.state?.from?.pathname || null;
@@ -56,7 +58,7 @@ const LoginPage = () => {
             </span>
           </Link>
           <h1 className="font-display text-2xl font-bold text-gray-900 mt-6">
-            Welcome back
+            {t('nav.login') === 'nav.login' ? 'Welcome back' : t('nav.login')}
           </h1>
           <p className="text-gray-500 text-sm mt-1">
             Log in to continue to KaamLink
@@ -142,7 +144,7 @@ const LoginPage = () => {
                 </>
               ) : (
                 <>
-                  Log In <ArrowRight size={16} />
+                  {t('nav.login')} <ArrowRight size={16} />
                 </>
               )}
             </button>
@@ -153,7 +155,7 @@ const LoginPage = () => {
               to="/signup"
               className="text-primary font-semibold hover:underline"
             >
-              Create an account
+              {t('nav.signup')}
             </Link>
           </p>
         </div>

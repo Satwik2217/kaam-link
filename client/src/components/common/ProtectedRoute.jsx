@@ -33,6 +33,22 @@ const ProtectedRoute = ({ children, role }) => {
     return <Navigate to={dashboardPath} replace />;
   }
 
+  // Feature A: Enforce KYC for Workers for specific routes (like accepting a job)
+  // For now, we simply won't block /worker/dashboard (so they can see the banner)
+  // But we CAN block /worker/my-bookings or similar routes if you want strict enforcement.
+  // The prompt asked to take them to /worker/kyc before letting them access booking actions.
+  if (
+    user?.role === 'worker' &&
+    location.pathname !== '/worker/dashboard' &&
+    location.pathname !== '/worker/kyc' &&
+    location.pathname !== '/worker/profile-setup'
+  ) {
+    // If they haven't submitted KYC or it was rejected
+    if (user.kycStatus === 'not_submitted' || user.kycStatus === 'rejected') {
+      return <Navigate to="/worker/kyc" replace />;
+    }
+  }
+
   return children;
 };
 
