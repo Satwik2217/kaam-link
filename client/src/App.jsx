@@ -4,6 +4,8 @@ import { AuthProvider } from '@/context/AuthContext';
 import ProtectedRoute from '@/components/common/ProtectedRoute';
 import Navbar from '@/components/common/Navbar';
 import Footer from '@/components/common/Footer';
+import { SocketProvider } from '@/context/SocketContext';
+import RealTimeJobNotification from '@/components/worker/RealTimeJobNotification';
 
 // Pages
 import LoginPage from '@/pages/auth/LoginPage';
@@ -47,158 +49,161 @@ function App() {
   return (
     <Router>
       <AuthProvider>
-        <Routes>
-          {/* Public routes with Navbar */}
-          <Route
-            path="/"
-            element={
-              <LayoutWithNav>
-                <LandingPage />
-              </LayoutWithNav>
-            }
-          />
-          <Route
-            path="/find-workers"
-            element={
-              <LayoutWithNav>
-                <FindWorkers />
-              </LayoutWithNav>
-            }
-          />
-          <Route
-            path="/how-it-works"
-            element={
-              <LayoutWithNav>
-                <HowItWorks />
-              </LayoutWithNav>
-            }
-          />
-          <Route
-            path="/safety"
-            element={
-              <LayoutWithNav>
-                <Safety />
-              </LayoutWithNav>
-            }
-          />
-          <Route
-            path="/terms"
-            element={
-              <LayoutWithNav>
-                <Terms />
-              </LayoutWithNav>
-            }
-          />
-          <Route
-            path="/privacy"
-            element={
-              <LayoutWithNav>
-                <Privacy />
-              </LayoutWithNav>
-            }
-          />
+        <SocketProvider>
+          <RealTimeJobNotification />
+          <Routes>
+            {/* Public routes with Navbar */}
+            <Route
+              path="/"
+              element={
+                <LayoutWithNav>
+                  <LandingPage />
+                </LayoutWithNav>
+              }
+            />
+            <Route
+              path="/find-workers"
+              element={
+                <LayoutWithNav>
+                  <FindWorkers />
+                </LayoutWithNav>
+              }
+            />
+            <Route
+              path="/how-it-works"
+              element={
+                <LayoutWithNav>
+                  <HowItWorks />
+                </LayoutWithNav>
+              }
+            />
+            <Route
+              path="/safety"
+              element={
+                <LayoutWithNav>
+                  <Safety />
+                </LayoutWithNav>
+              }
+            />
+            <Route
+              path="/terms"
+              element={
+                <LayoutWithNav>
+                  <Terms />
+                </LayoutWithNav>
+              }
+            />
+            <Route
+              path="/privacy"
+              element={
+                <LayoutWithNav>
+                  <Privacy />
+                </LayoutWithNav>
+              }
+            />
 
-          {/* Auth routes (no Navbar) */}
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/signup" element={<SignupPage />} />
-          <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+            {/* Auth routes (no Navbar) */}
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/signup" element={<SignupPage />} />
+            <Route path="/forgot-password" element={<ForgotPasswordPage />} />
 
-          {/* Protected: General User Routes */}
-          <Route
-            path="/profile"
-            element={
-              <ProtectedRoute>
-                <LayoutWithNav>
-                  <ProfilePage />
-                </LayoutWithNav>
-              </ProtectedRoute>
-            }
-          />
+            {/* Protected: General User Routes */}
+            <Route
+              path="/profile"
+              element={
+                <ProtectedRoute>
+                  <LayoutWithNav>
+                    <ProfilePage />
+                  </LayoutWithNav>
+                </ProtectedRoute>
+              }
+            />
 
-          {/* Protected: Worker routes */}
-          <Route
-            path="/worker/dashboard"
-            element={
-              <ProtectedRoute role="worker">
-                <LayoutWithNav>
-                  <WorkerDashboard />
-                </LayoutWithNav>
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/worker/profile-setup"
-            element={
-              <ProtectedRoute role="worker">
-                <LayoutWithNav>
-                  <WorkerProfileSetup />
-                </LayoutWithNav>
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/worker/kyc"
-            element={
-              <ProtectedRoute role="worker">
-                <LayoutWithNav>
-                  <WorkerKycSetup />
-                </LayoutWithNav>
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/worker/my-bookings"
-            element={
-              <ProtectedRoute role="worker">
-                <LayoutWithNav>
-                  <WorkerMyBookings />
-                </LayoutWithNav>
-              </ProtectedRoute>
-            }
-          />
+            {/* Protected: Worker routes */}
+            <Route
+              path="/worker/dashboard"
+              element={
+                <ProtectedRoute role="worker">
+                  <LayoutWithNav>
+                    <WorkerDashboard />
+                  </LayoutWithNav>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/worker/profile-setup"
+              element={
+                <ProtectedRoute role="worker">
+                  <LayoutWithNav>
+                    <WorkerProfileSetup />
+                  </LayoutWithNav>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/worker/kyc"
+              element={
+                <ProtectedRoute role="worker">
+                  <LayoutWithNav>
+                    <WorkerKycSetup />
+                  </LayoutWithNav>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/worker/my-bookings"
+              element={
+                <ProtectedRoute role="worker">
+                  <LayoutWithNav>
+                    <WorkerMyBookings />
+                  </LayoutWithNav>
+                </ProtectedRoute>
+              }
+            />
 
-          {/* Protected: Employer routes */}
-          <Route
-            path="/employer/dashboard"
-            element={
-              <ProtectedRoute role="employer">
-                <LayoutWithNav>
-                  <EmployerDashboard />
-                </LayoutWithNav>
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/employer/search"
-            element={
-              <ProtectedRoute role="employer">
-                <LayoutWithNav>
-                  <SearchWorkers />
-                </LayoutWithNav>
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/employer/my-bookings"
-            element={
-              <ProtectedRoute role="employer">
-                <LayoutWithNav>
-                  <EmployerMyBookings />
-                </LayoutWithNav>
-              </ProtectedRoute>
-            }
-          />
+            {/* Protected: Employer routes */}
+            <Route
+              path="/employer/dashboard"
+              element={
+                <ProtectedRoute role="employer">
+                  <LayoutWithNav>
+                    <EmployerDashboard />
+                  </LayoutWithNav>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/employer/search"
+              element={
+                <ProtectedRoute role="employer">
+                  <LayoutWithNav>
+                    <SearchWorkers />
+                  </LayoutWithNav>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/employer/my-bookings"
+              element={
+                <ProtectedRoute role="employer">
+                  <LayoutWithNav>
+                    <EmployerMyBookings />
+                  </LayoutWithNav>
+                </ProtectedRoute>
+              }
+            />
 
-          {/* Catch-all */}
-          <Route
-            path="*"
-            element={
-              <LayoutWithNav>
-                <NotFound />
-              </LayoutWithNav>
-            }
-          />
-        </Routes>
+            {/* Catch-all */}
+            <Route
+              path="*"
+              element={
+                <LayoutWithNav>
+                  <NotFound />
+                </LayoutWithNav>
+              }
+            />
+          </Routes>
+        </SocketProvider>
       </AuthProvider>
     </Router>
   );

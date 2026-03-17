@@ -3,7 +3,8 @@ import axiosInstance from '@/api/axiosInstance';
 import WorkerCard from '@/components/worker/WorkerCard';
 import CommandPalette from '@/components/common/CommandPalette';
 import MapDiscovery from '@/components/common/MapDiscovery';
-import { Search, Filter, Users, Star, MapPin, Clock, TrendingUp, Map as MapIcon, List } from 'lucide-react';
+import BookWorkerModal from '@/components/booking/BookWorkerModal';
+import { Search, Filter, Users, Star, MapPin, Clock, TrendingUp, Map as MapIcon, List, CheckCircle2 } from 'lucide-react';
 
 const SearchWorkers = () => {
   const [workers, setWorkers] = useState([]);
@@ -17,6 +18,8 @@ const SearchWorkers = () => {
   const [viewMode, setViewMode] = useState('list'); // 'list' | 'map'
   const [userLocation, setUserLocation] = useState(null);
   const [isLocating, setIsLocating] = useState(false);
+  const [selectedWorkerToBook, setSelectedWorkerToBook] = useState(null);
+  const [bookingSuccess, setBookingSuccess] = useState(false);
 
   const categories = useMemo(
     () => [
@@ -305,8 +308,7 @@ const SearchWorkers = () => {
               <MapDiscovery 
                 selectedSkill={selectedSkill}
                 onWorkerSelect={(worker) => {
-                  // Handle worker selection - could open modal or navigate to profile
-                  console.log('Selected worker:', worker);
+                  setSelectedWorkerToBook(worker);
                 }}
               />
             ) : (
@@ -347,6 +349,31 @@ const SearchWorkers = () => {
           </div>
         )}
       </div>
+
+      {selectedWorkerToBook && (
+        <BookWorkerModal 
+          worker={selectedWorkerToBook} 
+          userLocation={userLocation}
+          onClose={() => setSelectedWorkerToBook(null)} 
+          onSuccess={() => {
+            setSelectedWorkerToBook(null);
+            setBookingSuccess(true);
+            setTimeout(() => setBookingSuccess(false), 3000);
+          }} 
+        />
+      )}
+
+      {bookingSuccess && (
+        <div className="fixed bottom-6 right-6 z-50 bg-gray-900 border border-gray-800 text-white p-4 rounded-xl shadow-2xl flex items-center gap-3 animate-slide-up">
+           <div className="bg-success-500/20 p-2 rounded-full">
+             <CheckCircle2 className="w-5 h-5 text-success-500" />
+           </div>
+           <div>
+             <p className="font-bold">Request Sent!</p>
+             <p className="text-sm text-gray-400">Waiting for worker to accept...</p>
+           </div>
+        </div>
+      )}
     </>
   );
 };

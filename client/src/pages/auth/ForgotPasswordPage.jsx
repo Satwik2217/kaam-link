@@ -35,7 +35,7 @@ const ForgotPasswordPage = () => {
     setIsLoading(true);
 
     try {
-      const response = await axiosInstance.post('/api/v1/auth/forgot-password', {
+      const response = await axiosInstance.post('/auth/forgot-password', {
         phone
       });
 
@@ -64,7 +64,7 @@ const ForgotPasswordPage = () => {
     setIsLoading(true);
 
     try {
-      const response = await axiosInstance.post('/api/v1/auth/verify-otp', {
+      const response = await axiosInstance.post('/auth/verify-otp', {
         phone,
         otp
       });
@@ -99,7 +99,7 @@ const ForgotPasswordPage = () => {
     setIsLoading(true);
 
     try {
-      const response = await axiosInstance.post('/api/v1/auth/reset-password', {
+      const response = await axiosInstance.post('/auth/reset-password', {
         phone,
         resetToken,
         newPassword
@@ -126,7 +126,7 @@ const ForgotPasswordPage = () => {
     setIsLoading(true);
 
     try {
-      const response = await axiosInstance.post('/api/v1/auth/forgot-password', {
+      const response = await axiosInstance.post('/auth/forgot-password', {
         phone
       });
 

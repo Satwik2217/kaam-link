@@ -3,6 +3,7 @@ import express from 'express';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import morgan from 'morgan';
+import { createServer } from 'http';
 import { connectDB } from './config/db.js';
 import authRoutes from './routes/auth.routes.js';
 import userRoutes from './routes/user.routes.js';
@@ -10,6 +11,7 @@ import workerRoutes from './routes/worker.routes.js';
 import bookingRoutes from './routes/booking.routes.js';
 import mapRoutes from './routes/map.routes.js';
 import { errorHandler, notFound } from './middleware/error.middleware.js';
+import { initSocket } from './sockets/socketManager.js';
 import dns from 'node:dns';
 dns.setServers(['8.8.8.8', '8.8.4.4']); // Force Google DNS
 import { setServers } from 'node:dns/promises';
@@ -63,7 +65,11 @@ app.use(notFound);
 app.use(errorHandler);
 
 const PORT = process.env.PORT || 5001;
-app.listen(PORT, () => {
+
+const httpServer = createServer(app);
+initSocket(httpServer);
+
+httpServer.listen(PORT, () => {
   console.log(`\n🚀 KaamLink server running in ${process.env.NODE_ENV} mode on port ${PORT}`);
   console.log(`   Health check: http://localhost:${PORT}/api/v1/health\n`);
 });

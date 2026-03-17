@@ -27,8 +27,8 @@ export const protect = async (req, res, next) => {
     // Verify token
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-    // Fetch fresh user from DB (excludes password due to `select: false`)
-    const user = await User.findById(decoded.userId).select('-password -otp');
+    // Fetch fresh user from DB. Password and OTP fields are excluded by schema defaults.
+    const user = await User.findById(decoded.userId);
 
     if (!user) {
       return next(new ApiError(401, 'User belonging to this token no longer exists.'));

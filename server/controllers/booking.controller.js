@@ -1,6 +1,7 @@
 import JobBooking from '../models/JobBooking.model.js';
 import WorkerProfile from '../models/WorkerProfile.model.js';
 import ApiError from '../utils/ApiError.js';
+import { emitToUser } from '../sockets/socketManager.js';
 
 // @desc    Create a new job booking request
 // @route   POST /api/v1/bookings
@@ -57,6 +58,17 @@ export const createBooking = async (req, res, next) => {
       platformFee,
       workerPayout: totalAmount - platformFee,
       jobType: jobType || 'one_time',
+    });
+
+    // Notify the worker in real-time
+    emitToUser(booking.workerId, 'new_booking_request', {
+      bookingId: booking._id,
+      jobTitle: booking.jobTitle,
+      jobDescription: booking.jobDescription,
+      jobLocation: booking.jobLocation,
+      totalAmount: booking.totalAmount,
+      employerId: req.user._id,
+      employerName: req.user.fullName || 'Employer',
     });
 
     res
@@ -146,6 +158,14 @@ export const updateBookingStatus = async (req, res, next) => {
     // but the employer needs it. The frontend might re-fetch.
     const responseBooking = booking.toObject();
     if (req.user.role === 'worker') delete responseBooking.startOTP;
+
+    // Notify the employer if the worker accepted the job
+    if (status === 'accepted') {
+      emitToUser(booking.employerId, 'booking_accepted', {
+        bookingId: booking._id,
+        workerId: booking.workerId,
+      });
+    }
 
     res.status(200).json({
       success: true,

@@ -1,12 +1,13 @@
+import { randomInt } from 'crypto';
 import { validationResult } from 'express-validator';
 import User from '../models/User.model.js';
 import WorkerProfile from '../models/WorkerProfile.model.js';
 import { generateTokenAndSetCookie, clearTokenCookie } from '../utils/generateToken.js';
 import ApiError from '../utils/ApiError.js';
 
-// Helper function to generate OTP
+// Helper function to generate a 6-digit OTP
 const generateOTP = () => {
-  return Math.floor(100000 + Math.random() * 900000).toString();
+  return String(randomInt(100000, 1000000));
 };
 
 // ==============================================================
@@ -177,8 +178,7 @@ export const getMe = async (req, res, next) => {
       .populate({
         path: 'workerProfile',
         select: '-reviews' // Exclude reviews for brevity in /me
-      })
-      .select('-password -otp'); // Exclude sensitive fields from main user document
+      });
 
     if (!user) {
       return next(new ApiError(404, 'User not found.'));
@@ -218,12 +218,12 @@ export const forgotPassword = async (req, res, next) => {
     const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes from now
 
     // Save OTP to user document
-    user.otp = { code: otp, expiresAt };
+    user.verificationOtp = { code: otp, expiresAt };
     await user.save();
 
     // TODO: Send OTP via SMS (for now, just log it)
     console.log(`Password Reset OTP for ${phone}: ${otp}`);
-    
+
     // In production, you would integrate with an SMS service like:
     // await sendSMS(phone, `Your KaamLink password reset OTP is: ${otp}. Valid for 10 minutes.`);
 
@@ -254,24 +254,26 @@ export const verifyOTP = async (req, res, next) => {
   const { phone, otp } = req.body;
 
   try {
-    // Find user by phone with OTP field
-    const user = await User.findOne({ phone }).select('+otp');
+    // Find user by phone and include the OTP fields (they are excluded by default)
+    const user = await User.findOne({ phone }).select(
+      '+verificationOtp.code +verificationOtp.expiresAt'
+    );
     if (!user) {
       return next(new ApiError(404, 'No account found with this phone number'));
     }
 
     // Check if OTP exists and is valid
-    if (!user.otp || !user.otp.code) {
+    if (!user.verificationOtp || !user.verificationOtp.code) {
       return next(new ApiError(400, 'No OTP request found. Please request a new OTP.'));
     }
 
     // Check if OTP has expired
-    if (user.otp.expiresAt < new Date()) {
+    if (user.verificationOtp.expiresAt < new Date()) {
       return next(new ApiError(400, 'OTP has expired. Please request a new OTP.'));
     }
 
     // Verify OTP
-    if (user.otp.code !== otp) {
+    if (user.verificationOtp.code !== otp) {
       return next(new ApiError(400, 'Invalid OTP. Please try again.'));
     }
 
@@ -283,7 +285,7 @@ export const verifyOTP = async (req, res, next) => {
     user.resetToken = resetToken;
     user.resetTokenExpiresAt = resetTokenExpiresAt;
     // Clear the OTP after successful verification
-    user.otp = undefined;
+    user.verificationOtp = undefined;
     await user.save();
 
     res.status(200).json({
@@ -330,11 +332,11 @@ export const resetPassword = async (req, res, next) => {
 
     // Update password
     user.password = newPassword;
-    
+
     // Clear reset token
     user.resetToken = undefined;
     user.resetTokenExpiresAt = undefined;
-    
+
     await user.save();
 
     res.status(200).json({

@@ -3,7 +3,7 @@ import { X, Calendar, MapPin, IndianRupee, Clock, ShieldCheck, Star, CheckCircle
 import axiosInstance from '@/api/axiosInstance';
 import { useAuth } from '@/hooks/useAuth';
 
-const BookWorkerModal = ({ worker, onClose, onSuccess }) => {
+const BookWorkerModal = ({ worker, onClose, onSuccess, userLocation }) => {
   const { user } = useAuth();
   const [formData, setFormData] = useState({
     jobTitle: '',
@@ -57,6 +57,12 @@ const BookWorkerModal = ({ worker, onClose, onSuccess }) => {
         jobLocation: {
           address: formData.address,
           city: formData.city || 'Not specified',
+          ...(userLocation && {
+            coordinates: {
+              type: 'Point',
+              coordinates: [userLocation.lng, userLocation.lat]
+            }
+          })
         },
         agreedWage: worker.wageRate,
         totalAmount,

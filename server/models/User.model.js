@@ -146,7 +146,7 @@ const userSchema = new mongoose.Schema(
     },
 
     // --- OTP for phone verification ---
-    otp: {
+    verificationOtp: {
       code: { type: String, select: false },
       expiresAt: { type: Date, select: false },
     },

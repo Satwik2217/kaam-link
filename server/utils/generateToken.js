@@ -17,7 +17,11 @@ export const generateTokenAndSetCookie = (res, userId, role) => {
   const cookieOptions = {
     httpOnly: true, // Prevents client-side JS from accessing the cookie (XSS protection)
     secure: process.env.NODE_ENV === 'production', // HTTPS only in production
-    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax', // Handle cross-origin in development vs production
+    // For cross-origin requests (frontend ↔ backend on different ports), the cookie
+    // needs SameSite=None to be sent with XHR/fetch.
+    // Note: Browsers typically require secure cookies when SameSite=None.
+    // During local development (HTTP), we allow it to work by using None without secure.
+    sameSite: 'none',
     maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days in milliseconds
     path: '/',
   };
@@ -33,7 +37,7 @@ export const clearTokenCookie = (res) => {
   res.cookie('kaamlink_jwt', '', {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
-    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+    sameSite: 'none',
     maxAge: 0,
     path: '/',
   });
