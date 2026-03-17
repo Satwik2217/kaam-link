@@ -23,6 +23,22 @@ export const createBooking = async (req, res, next) => {
     const workerProfile = await WorkerProfile.findById(workerProfileId);
     if (!workerProfile) return next(new ApiError(404, 'Worker profile not found.'));
 
+    if (!jobLocation || !jobLocation.address || !jobLocation.city) {
+      return next(new ApiError(400, 'Job location (address and city) is required.'));
+    }
+
+    const start = new Date(scheduledStartDate);
+    const end = new Date(scheduledEndDate);
+    if (start < new Date().setHours(0,0,0,0)) {
+       return next(new ApiError(400, 'Start date cannot be in the past.'));
+    }
+    if (end < start) {
+       return next(new ApiError(400, 'End date cannot be earlier than start date.'));
+    }
+    if (!totalAmount || Number(totalAmount) < workerProfile.wageRate.amount) {
+       return next(new ApiError(400, 'Invalid total amount for this booking.'));
+    }
+
     const platformFeeRate = 0.05; // 5%
     const platformFee = Math.round(totalAmount * platformFeeRate);
 
@@ -122,6 +138,38 @@ export const updateBookingStatus = async (req, res, next) => {
       success: true,
       message: `Booking status updated to '${status}'.`,
       booking,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Trigger SOS for a booking
+// @route   POST /api/v1/bookings/:id/sos
+// @access  Private
+export const triggerSOS = async (req, res, next) => {
+  try {
+    const booking = await JobBooking.findById(req.params.id);
+    if (!booking) return next(new ApiError(404, 'Booking not found.'));
+
+    // Verify user is part of the booking
+    if (booking.employerId.toString() !== req.user._id.toString() && 
+        booking.workerId.toString() !== req.user._id.toString()) {
+      return next(new ApiError(403, 'Not authorized to trigger SOS for this booking.'));
+    }
+
+    const sosAlert = {
+      triggeredBy: req.user._id,
+      triggeredAt: new Date(),
+      location: booking.jobLocation.coordinates ? booking.jobLocation : { type: 'Point', coordinates: [0, 0] }
+    };
+
+    booking.sosAlerts.push(sosAlert);
+    await booking.save();
+
+    res.status(200).json({
+      success: true,
+      message: 'SOS Alert triggered successfully. Our team has been notified.',
     });
   } catch (error) {
     next(error);

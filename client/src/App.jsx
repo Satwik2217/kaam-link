@@ -8,11 +8,20 @@ import Footer from '@/components/common/Footer';
 // Pages
 import LoginPage from '@/pages/auth/LoginPage';
 import SignupPage from '@/pages/auth/SignupPage';
+import ForgotPasswordPage from '@/pages/auth/ForgotPasswordPage';
 import WorkerDashboard from '@/pages/worker/WorkerDashboard';
 import WorkerProfileSetup from '@/pages/worker/WorkerProfileSetup';
+import WorkerMyBookings from '@/pages/worker/WorkerMyBookings';
 import EmployerDashboard from '@/pages/employer/EmployerDashboard';
 import SearchWorkers from '@/pages/employer/SearchWorkers';
+import EmployerMyBookings from '@/pages/employer/EmployerMyBookings';
 import LandingPage from '@/pages/LandingPage';
+import FindWorkers from '@/pages/public/FindWorkers';
+import HowItWorks from '@/pages/public/HowItWorks';
+import Safety from '@/pages/public/Safety';
+import Terms from '@/pages/public/Terms';
+import Privacy from '@/pages/public/Privacy';
+import ProfilePage from '@/pages/profile/ProfilePage';
 
 const NotFound = () => (
   <div className="max-w-7xl mx-auto px-4 py-20 text-center">
@@ -47,10 +56,63 @@ function App() {
               </LayoutWithNav>
             }
           />
+          <Route
+            path="/find-workers"
+            element={
+              <LayoutWithNav>
+                <FindWorkers />
+              </LayoutWithNav>
+            }
+          />
+          <Route
+            path="/how-it-works"
+            element={
+              <LayoutWithNav>
+                <HowItWorks />
+              </LayoutWithNav>
+            }
+          />
+          <Route
+            path="/safety"
+            element={
+              <LayoutWithNav>
+                <Safety />
+              </LayoutWithNav>
+            }
+          />
+          <Route
+            path="/terms"
+            element={
+              <LayoutWithNav>
+                <Terms />
+              </LayoutWithNav>
+            }
+          />
+          <Route
+            path="/privacy"
+            element={
+              <LayoutWithNav>
+                <Privacy />
+              </LayoutWithNav>
+            }
+          />
 
           {/* Auth routes (no Navbar) */}
           <Route path="/login" element={<LoginPage />} />
           <Route path="/signup" element={<SignupPage />} />
+          <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+
+          {/* Protected: General User Routes */}
+          <Route
+            path="/profile"
+            element={
+              <ProtectedRoute>
+                <LayoutWithNav>
+                  <ProfilePage />
+                </LayoutWithNav>
+              </ProtectedRoute>
+            }
+          />
 
           {/* Protected: Worker routes */}
           <Route
@@ -73,6 +135,16 @@ function App() {
               </ProtectedRoute>
             }
           />
+          <Route
+            path="/worker/my-bookings"
+            element={
+              <ProtectedRoute role="worker">
+                <LayoutWithNav>
+                  <WorkerMyBookings />
+                </LayoutWithNav>
+              </ProtectedRoute>
+            }
+          />
 
           {/* Protected: Employer routes */}
           <Route
@@ -91,6 +163,16 @@ function App() {
               <ProtectedRoute role="employer">
                 <LayoutWithNav>
                   <SearchWorkers />
+                </LayoutWithNav>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/employer/my-bookings"
+            element={
+              <ProtectedRoute role="employer">
+                <LayoutWithNav>
+                  <EmployerMyBookings />
                 </LayoutWithNav>
               </ProtectedRoute>
             }

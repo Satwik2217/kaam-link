@@ -17,7 +17,7 @@ export const generateTokenAndSetCookie = (res, userId, role) => {
   const cookieOptions = {
     httpOnly: true, // Prevents client-side JS from accessing the cookie (XSS protection)
     secure: process.env.NODE_ENV === 'production', // HTTPS only in production
-    sameSite: 'strict', // CSRF protection
+    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax', // Handle cross-origin in development vs production
     maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days in milliseconds
     path: '/',
   };
@@ -33,7 +33,7 @@ export const clearTokenCookie = (res) => {
   res.cookie('kaamlink_jwt', '', {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
-    sameSite: 'strict',
+    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
     maxAge: 0,
     path: '/',
   });
