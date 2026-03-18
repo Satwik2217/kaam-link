@@ -40,20 +40,9 @@ const jobBookingSchema = new mongoose.Schema(
       type: String,
       required: true,
       enum: [
-        'maid',
-        'cook',
-        'driver',
-        'plumber',
-        'electrician',
-        'carpenter',
-        'painter',
-        'ac_technician',
-        'gardener',
-        'security_guard',
-        'babysitter',
-        'elder_care',
-        'delivery',
-        'other',
+        'maid', 'cook', 'driver', 'plumber', 'electrician', 'carpenter', 
+        'painter', 'ac_technician', 'gardener', 'security_guard', 
+        'babysitter', 'elder_care', 'delivery', 'other',
       ],
     },
 
@@ -74,11 +63,18 @@ const jobBookingSchema = new mongoose.Schema(
       default: 'one_time',
     },
 
-    // --- Location ---
+    // --- Location (UPDATED FOR MAP-LESS FLOW) ---
     jobLocation: {
-      address: { type: String, required: true },
-      city: { type: String, required: true },
+      address: { 
+        type: String, 
+        required: [true, 'Full service address is required'] 
+      },
+      city: { 
+        type: String, 
+        required: [true, 'City is required for regional filtering'] 
+      },
       pincode: { type: String },
+      // Coordinates kept as optional for background tracking, but no longer required for search
       coordinates: {
         type: { type: String, default: 'Point' },
         coordinates: { type: [Number], default: [0, 0] },
@@ -97,11 +93,11 @@ const jobBookingSchema = new mongoose.Schema(
     },
     platformFee: {
       type: Number,
-      default: 0, // Platform commission (e.g., 5% of totalAmount)
+      default: 0, 
     },
     workerPayout: {
       type: Number,
-      default: 0, // totalAmount - platformFee
+      default: 0, 
     },
 
     // --- Booking Lifecycle Status ---
@@ -109,12 +105,12 @@ const jobBookingSchema = new mongoose.Schema(
       type: String,
       enum: {
         values: [
-          'pending_worker_acceptance', // Employer created, waiting for worker
-          'accepted', // Worker accepted
-          'rejected', // Worker rejected
-          'in_progress', // Job is actively happening
-          'pending_completion_review', // Worker marked done, employer to confirm
-          'completed', // Employer confirmed, triggers payment release
+          'pending_worker_acceptance', 
+          'accepted', 
+          'rejected', 
+          'in_progress', 
+          'pending_completion_review', 
+          'completed', 
           'cancelled_by_employer',
           'cancelled_by_worker',
           'disputed',
@@ -139,29 +135,6 @@ const jobBookingSchema = new mongoose.Schema(
     paymentTransactionId: { type: String, default: null },
     paymentReleasedAt: { type: Date, default: null },
 
-    // --- Safety & Tracking ---
-    safetyCheckin: {
-      isEnabled: { type: Boolean, default: false },
-      lastCheckinTime: { type: Date, default: null },
-      workerCurrentLocation: {
-        type: { type: String, default: 'Point' },
-        coordinates: { type: [Number], default: [0, 0] },
-      },
-    },
-    sosAlerts: [
-      {
-        triggeredBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
-        triggeredAt: { type: Date, default: Date.now },
-        location: {
-          type: { type: String, default: 'Point' },
-          coordinates: [Number],
-        },
-        isResolved: { type: Boolean, default: false },
-        resolvedAt: { type: Date },
-        notes: { type: String },
-      },
-    ],
-
     // --- Reviews ---
     employerReview: {
       rating: { type: Number, min: 1, max: 5 },
@@ -175,9 +148,6 @@ const jobBookingSchema = new mongoose.Schema(
     },
     isEmployerReviewSubmitted: { type: Boolean, default: false },
     isWorkerReviewSubmitted: { type: Boolean, default: false },
-
-    // --- Admin Notes ---
-    adminNotes: { type: String, default: null },
   },
   {
     timestamps: true,
@@ -200,4 +170,3 @@ jobBookingSchema.virtual('durationHours').get(function () {
 
 const JobBooking = mongoose.model('JobBooking', jobBookingSchema);
 export default JobBooking;
-

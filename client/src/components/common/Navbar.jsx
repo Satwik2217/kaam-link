@@ -9,6 +9,8 @@ import {
   LayoutDashboard,
   ChevronDown,
   Globe,
+  ClipboardList,
+  ShieldCheck,
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useLanguage } from '@/context/LanguageContext';
@@ -42,41 +44,63 @@ const Navbar = () => {
             </span>
           </Link>
 
-        {/* Desktop Nav */}
-        <nav className="hidden md:flex items-center gap-6">
-          <Link
-            to="/find-workers"
-            className="text-sm font-medium text-gray-600 hover:text-primary transition-colors"
-          >
-            {t('nav.findWorkers')}
-          </Link>
-          <Link
-            to="/how-it-works"
-            className="text-sm font-medium text-gray-600 hover:text-primary transition-colors"
-          >
-            {t('nav.howItWorks')}
-          </Link>
-          <Link
-            to="/safety"
-            className="text-sm font-medium text-gray-600 hover:text-primary transition-colors"
-          >
-            {t('nav.safety')}
-          </Link>
-        </nav>
+          {/* Desktop Nav - Role Based */}
+          <nav className="hidden md:flex items-center gap-6">
+            {/* If NOT a worker, show Find Workers */}
+            {user?.role !== 'worker' && (
+              <Link
+                to="/find-workers"
+                className="text-sm font-medium text-gray-600 hover:text-primary transition-colors"
+              >
+                {t('nav.findWorkers')}
+              </Link>
+            )}
 
-        {/* Auth Actions & Language */}
-        <div className="hidden md:flex items-center gap-3">
-          <button 
-            onClick={toggleLanguage}
-            className="flex items-center gap-1 text-sm font-medium text-gray-600 hover:text-primary px-2 py-1 rounded-md transition-colors"
-            title="Switch Language"
-          >
-            <Globe size={16} /> {currentLanguage === 'en' ? 'HI' : 'EN'}
-          </button>
-          <div className="w-px h-6 bg-border mx-2"></div>
-          
-          {isAuthenticated && user ? (
-            <div className="relative">
+            {/* If IS a worker, show Worker Specific Links */}
+            {isAuthenticated && user?.role === 'worker' && (
+              <>
+                <Link
+                  to="/worker/my-bookings"
+                  className="text-sm font-medium text-gray-600 hover:text-primary transition-colors flex items-center gap-1"
+                >
+                  <ClipboardList size={14} /> My Bookings
+                </Link>
+                <Link
+                  to="/worker/kyc"
+                  className="text-sm font-medium text-gray-600 hover:text-primary transition-colors flex items-center gap-1"
+                >
+                  <ShieldCheck size={14} /> KYC Status
+                </Link>
+              </>
+            )}
+
+            <Link
+              to="/how-it-works"
+              className="text-sm font-medium text-gray-600 hover:text-primary transition-colors"
+            >
+              {t('nav.howItWorks')}
+            </Link>
+            <Link
+              to="/safety"
+              className="text-sm font-medium text-gray-600 hover:text-primary transition-colors"
+            >
+              {t('nav.safety')}
+            </Link>
+          </nav>
+
+          {/* Auth Actions & Language */}
+          <div className="hidden md:flex items-center gap-3">
+            <button
+              onClick={toggleLanguage}
+              className="flex items-center gap-1 text-sm font-medium text-gray-600 hover:text-primary px-2 py-1 rounded-md transition-colors"
+              title="Switch Language"
+            >
+              <Globe size={16} /> {currentLanguage === 'en' ? 'HI' : 'EN'}
+            </button>
+            <div className="w-px h-6 bg-border mx-2"></div>
+
+            {isAuthenticated && user ? (
+              <div className="relative">
                 <button
                   type="button"
                   onClick={() => setIsDropdownOpen(!isDropdownOpen)}
@@ -144,21 +168,45 @@ const Navbar = () => {
       {isMenuOpen && (
         <div className="md:hidden border-t border-border bg-white px-4 py-4 space-y-3">
           <div className="flex items-center justify-between pb-2 border-b border-border">
-             <span className="text-sm text-gray-500">Language</span>
-             <button 
-                onClick={toggleLanguage}
-                className="flex items-center gap-2 text-sm font-medium text-primary px-3 py-1.5 rounded-lg bg-primary/10 transition-colors"
-              >
-                <Globe size={16} /> {currentLanguage === 'en' ? 'हिन्दी (Hindi)' : 'English'}
-              </button>
+            <span className="text-sm text-gray-500">Language</span>
+            <button
+              onClick={toggleLanguage}
+              className="flex items-center gap-2 text-sm font-medium text-primary px-3 py-1.5 rounded-lg bg-primary/10 transition-colors"
+            >
+              <Globe size={16} /> {currentLanguage === 'en' ? 'हिन्दी (Hindi)' : 'English'}
+            </button>
           </div>
-          <Link
-            to="/find-workers"
-            className="block py-2 text-sm font-medium text-gray-700"
-            onClick={() => setIsMenuOpen(false)}
-          >
-            {t('nav.findWorkers')}
-          </Link>
+          
+          {/* Mobile Logic: Hide Find Workers for Workers */}
+          {user?.role !== 'worker' && (
+            <Link
+              to="/find-workers"
+              className="block py-2 text-sm font-medium text-gray-700"
+              onClick={() => setIsMenuOpen(false)}
+            >
+              {t('nav.findWorkers')}
+            </Link>
+          )}
+
+          {isAuthenticated && user?.role === 'worker' && (
+             <>
+               <Link
+                to="/worker/my-bookings"
+                className="block py-2 text-sm font-medium text-gray-700"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                My Bookings
+              </Link>
+              <Link
+                to="/worker/kyc"
+                className="block py-2 text-sm font-medium text-gray-700"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                KYC Status
+              </Link>
+             </>
+          )}
+
           <Link
             to="/how-it-works"
             className="block py-2 text-sm font-medium text-gray-700"
@@ -166,6 +214,7 @@ const Navbar = () => {
           >
             {t('nav.howItWorks')}
           </Link>
+          
           {isAuthenticated ? (
             <>
               <Link
@@ -208,4 +257,3 @@ const Navbar = () => {
 };
 
 export default Navbar;
-

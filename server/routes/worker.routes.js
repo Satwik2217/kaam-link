@@ -11,12 +11,13 @@ import { restrictTo } from '../middleware/role.middleware.js';
 
 const router = express.Router();
 
-router.get('/', getWorkers);
-router.get('/:id', getWorkerById);
-
-// Worker Protected Routes
+// Worker Protected Routes (must be before param routes like /:id)
 router.put('/my-profile', protect, restrictTo('worker'), updateMyWorkerProfile);
 router.put('/my-kyc', protect, restrictTo('worker'), submitKyc);
 router.get('/my-kyc', protect, restrictTo('worker'), getMyKycStatus);
+
+// Public Routes
+router.get('/', getWorkers);
+router.get('/:id', getWorkerById);
 
 export default router;

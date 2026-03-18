@@ -28,14 +28,27 @@ axiosInstance.interceptors.response.use(
   (error) => {
     const { response } = error;
     if (response) {
-      // Handle 401 (unauthorized) globally - redirect to login
+      // Handle 401 (unauthorized) globally
       if (response.status === 401) {
         localStorage.removeItem('kaamlink_token');
-        // Only redirect if not already on auth pages
-        if (
-          !window.location.pathname.startsWith('/login') &&
-          !window.location.pathname.startsWith('/signup')
-        ) {
+
+        // --- UPDATED SAFE ZONE ---
+        // Added '/worker/profile-setup' so workers can complete their info without getting kicked out
+        const publicPaths = [
+          '/', 
+          '/login', 
+          '/signup', 
+          '/forgot-password', 
+          '/how-it-works', 
+          '/safety', 
+          '/worker/kyc',
+          '/worker/profile-setup'
+        ];
+        
+        // Check if the current URL is in our "Safe Zone"
+        const isPublicPath = publicPaths.includes(window.location.pathname);
+
+        if (!isPublicPath) {
           window.location.href = '/login';
         }
       }
@@ -45,4 +58,3 @@ axiosInstance.interceptors.response.use(
 );
 
 export default axiosInstance;
-

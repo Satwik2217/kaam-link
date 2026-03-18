@@ -83,21 +83,19 @@ const userSchema = new mongoose.Schema(
       default: null,
     },
     bankAccount: {
-      holderName: { type: String, trim: true, select: false },
+      holderName: { type: String, trim: true },
       accountNumber: {
         type: String,
         trim: true,
-        select: false,
         match: [/^\d{9,18}$/, 'Account number must be between 9 and 18 digits'],
       },
       ifsc: {
         type: String,
         trim: true,
-        select: false,
         match: [/^[A-Z]{4}0[A-Z0-9]{6}$/, 'Please enter a valid IFSC code'],
       },
-      bankName: { type: String, trim: true, select: false },
-      upiId: { type: String, trim: true, select: false },
+      bankName: { type: String, trim: true },
+      upiId: { type: String, trim: true },
     },
     kycStatus: {
       type: String,

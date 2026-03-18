@@ -53,11 +53,14 @@ const SignupPage = () => {
     try {
       const data = await signup(formData);
       if (data.success) {
-        navigate(
-          data.user.role === 'worker'
-            ? '/worker/dashboard'
-            : '/employer/dashboard'
-        );
+        // --- UPDATED REDIRECT LOGIC ---
+        // If it's a worker, force them to setup their profile immediately
+        if (data.user.role === 'worker') {
+          navigate('/worker/profile-setup', { replace: true });
+        } else {
+          // Employers go straight to their dashboard
+          navigate('/employer/dashboard', { replace: true });
+        }
       }
     } catch (err) {
       setError(
@@ -258,4 +261,3 @@ const SignupPage = () => {
 };
 
 export default SignupPage;
-

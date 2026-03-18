@@ -14,18 +14,23 @@ const WorkerDashboard = () => {
 
   const workerProfile = user?.workerProfile || null;
   const isProfileComplete = !!workerProfile?.isProfileComplete;
+  const canGoOnline = isProfileComplete || kycStatus === 'pending_review' || kycStatus === 'verified';
   const isOnlineInitial = !!workerProfile?.isOnline;
   const [isOnline, setIsOnline] = useState(isOnlineInitial);
   const [isUpdatingOnline, setIsUpdatingOnline] = useState(false);
 
   // Keep derived values stable for render
   const onlineLabel = useMemo(() => {
-    if (!isProfileComplete) return 'Complete onboarding to go online';
+    if (!canGoOnline) {
+      return kycStatus === 'not_submitted' || kycStatus === 'rejected'
+        ? 'Complete KYC to go online'
+        : 'Waiting for KYC review';
+    }
     return isOnline ? 'Online (visible to employers)' : 'Offline (hidden from employers)';
-  }, [isOnline, isProfileComplete]);
+  }, [canGoOnline, isOnline, kycStatus]);
 
   const handleToggleOnline = async () => {
-    if (!isProfileComplete) return;
+    if (!canGoOnline) return;
     const next = !isOnline;
     setIsOnline(next);
     setIsUpdatingOnline(true);
@@ -127,13 +132,13 @@ const WorkerDashboard = () => {
           <button
             type="button"
             onClick={handleToggleOnline}
-            disabled={!isProfileComplete || isUpdatingOnline}
+            disabled={!canGoOnline || isUpdatingOnline}
             className={`relative inline-flex h-12 w-20 items-center rounded-full transition-all duration-300 ${
-              isOnline && isProfileComplete ? 'bg-success-500 shadow-glow' : 'bg-secondary-300'
-            } ${!isProfileComplete ? 'opacity-60 cursor-not-allowed' : ''}`}
+              isOnline && canGoOnline ? 'bg-success-500 shadow-glow' : 'bg-secondary-300'
+            } ${!canGoOnline ? 'opacity-60 cursor-not-allowed' : ''}`}
             aria-pressed={isOnline}
             aria-label="Toggle online status"
-            title={!isProfileComplete ? 'Complete your onboarding to go online' : 'Toggle online'}
+            title={!canGoOnline ? (kycStatus === 'not_submitted' || kycStatus === 'rejected' ? 'Complete your KYC to go online' : 'Waiting for KYC review') : 'Toggle online'}
           >
             <span
               className={`inline-block h-10 w-10 transform rounded-full bg-white shadow-lg transition-transform ${
